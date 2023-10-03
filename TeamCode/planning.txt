@@ -1,0 +1,26 @@
+Competition robot!
+  - AUTONOMOUS PERIOD (no human interference)
+    - Move around
+    - Computer vision for orientation
+    - Computer vision to know what to do
+      - Adjust path on the fly (intelligent Roomba)
+    - Know where it is so it knows where to go
+  - TELEOP PERIOD (human controlled)
+    - Use all the features of the robot
+      - Arm (hand, joints)
+      - Wheels
+
+Systems:
+  - Omnidirectional drive (drive in any direction, turn)
+  - Arm control
+  - Navigator/spidersense (keep track of expected position and update with sensor inputs)
+  - Path planner/Google Maps (use sensor input to plan where to go, maybe recover from collisions)
+    - Piece management (did we actually pick up that pixel? use weight sense from arm encoder or vision)
+
+
+Questions:
+  - Can you move the spike around?
+  - Can you use a motor as a motion sensor?
+
+Notes:
+  - A multi-jointed arm could better flick the paper airplane
