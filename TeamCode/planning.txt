@@ -1,5 +1,5 @@
 Competition robot!
-  - AUTONOMOUS PERIOD (no human interference)
+  - AUTONOMOUS PERIOD (no human control)
     - Move around
     - Computer vision for orientation
     - Computer vision to know what to do
@@ -20,7 +20,7 @@ Systems:
 
 Questions:
   - Can you move the spike around?
-  - Can you use a motor as a motion sensor?
+  - Can you use a motor as a weight sensor?
 
 Notes:
   - A multi-jointed arm could better flick the paper airplane
