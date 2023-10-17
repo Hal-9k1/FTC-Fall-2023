@@ -1,0 +1,29 @@
+// Drive system, due 10/18/2023 Wed, demo'd 10/23/2023 Mon
+
+interface Drive {
+  MotorActions move(Vector2 direction, double speed);
+  MotorActions turn(double angle, double speed);
+  MotorActions swivel(Vector2 direction, double angle, double speed);
+  boolean tick(MotorActions action);
+  void tickInput(InputInfo input);
+}
+
+// Navigator, due 10/18/2023 Wed, demo'd 10/23/2023 Mon
+
+interface RobotNavigator {
+  // Keep track of where (we think) we are: position + rotation
+  void updateWithTags(/* pass in AprilTag input */);
+  void updateWithEncoders(/* encoder input*/);
+  void adjustMotion(MotorActions action);
+}
+
+// Demo 10/23/2023: command robot to move autonomously to arbitrary positions
+// on the field.
+
+// Path planning, due 10/25/2023 Wed??
+
+interface PathPlanning {
+  // Vision stuff besides AprilTags
+  // Pathfinding, or something
+  // Keep track of obstructions (other robots), if we're doing that
+}

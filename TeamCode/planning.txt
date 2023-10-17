@@ -11,16 +11,19 @@ Competition robot!
       - Wheels
 
 Systems:
-  - Omnidirectional drive (drive in any direction, turn)
+  - * Omnidirectional drive (drive in any direction, turn)
   - Arm control
-  - Navigator/spidersense (keep track of expected position and update with sensor inputs)
+  - * Navigator/spidersense (keep track of expected position and update with sensor inputs)
   - Path planner/Google Maps (use sensor input to plan where to go, maybe recover from collisions)
     - Piece management (did we actually pick up that pixel? use weight sense from arm encoder or vision)
 
 
 Questions:
-  - Can you move the spike around?
-  - Can you use a motor as a weight sensor?
+  - Can you use a motor as a weight sensor? (All reach goals)
+    - Limit switches in the hand
+    - Resistance in the hand servo (if there is a hand servo)
+    - Vision, possibly
+    - How are you going to make a better attempt to pick it up than last time?
 
 Notes:
   - A multi-jointed arm could better flick the paper airplane
