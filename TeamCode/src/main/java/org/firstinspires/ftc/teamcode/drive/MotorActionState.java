@@ -4,22 +4,23 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.vecmath.Matrix4d;
 
 // Independent of robot configuration.
-public class MotorActions {
+public class MotorActionState {
   private Set<String> motorNames;
   private Map<String, Double> initialEncoders;
   private Map<String, Double> speeds;
   private Map<String, Double> finalEncoders;
   private Map<String, Double> encoders;
-  private Point3d goalPosition;
-  private double goalRotation;
+  private Matrix4d goalTransform;
 
-  private MotorActions(Map<String, Double> initialEncoders, Map<String, Double> speeds,
-    Map<String, Double> finalEncoders) {
+  private MotorActionState(Map<String, Double> initialEncoders, Map<String, Double> speeds,
+    Map<String, Double> finalEncoders, Matrix4d goalTransform) {
     this.initialEncoders = initialEncoders;
     this.speeds = speeds;
     this.finalEncoders = finalEncoders;
+    this.goalTransform = goalTransform;
   }
   
   public double getInitialEncoder(String motorName) {
@@ -46,6 +47,9 @@ public class MotorActions {
     checkMotorName(motorName);
     encoders.put(motorName);
   }
+  public Matrix4d getGoalTransform() {
+    return new Matrix4d(goalTransform); // don't expose mutable object
+  }
   private void checkMotorName(String motorName) {
     if (!motorNames.contains(motorName))
       throw IllegalArgumentException("Motor " + motorName + " invalid.");
@@ -57,6 +61,7 @@ public class MotorActions {
     private Map<String, Double> initialEncoders;
     private Map<String, Double> speeds;
     private Map<String, Double> finalEncoders;
+    private Matrix4d goalTransform;
     private boolean finalized;
 
     public Builder() {
@@ -64,6 +69,8 @@ public class MotorActions {
       initialEncoders = new HashMap<Double, String>();
       speeds = new HashMap<Double, String>();
       finalEncoders = new HashMap<Double, String>();
+      goalTransform = null;
+      finalized = false;
     }
 
     public void setInitialEncoder(String motorName, double value) {
@@ -81,10 +88,16 @@ public class MotorActions {
       motorNames.add(motorName);
       initialEncoders.put(motorName, value);
     }
-    public MotorActions build() {
+    public void setGoalTransform(Matrix4d goalTransform) {
+      goalTransform = new Matrix4d(goalTransform);
+    }
+    public MotorActionState build() {
       checkFinalized();
       finalized = true;
-      return new MotorActions(motorNames, initialEncoders, speeds, finalEncoders);
+      if (goalTransform == null) {
+        throw new IllegalStateException("Goal transform has not been set.");
+      }
+      return new MotorActionState(motorNames, initialEncoders, speeds, finalEncoders, goalTransform);
     }
     private void checkFinalized() {
       if (finalized) {

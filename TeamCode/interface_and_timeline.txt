@@ -6,7 +6,7 @@ interface Drive {
   MotorActions swivel(Vector2 direction, double angle, double speed);
   boolean tick(MotorActions action);
   void tickInput(InputInfo input);
-  Vector3 getUnexpectedOffset(MotorActions);
+  Vector2 getUnexpectedOffset(MotorActions);
 }
 
 // Navigator, due 10/18/2023 Wed, demo'd 10/23/2023 Mon

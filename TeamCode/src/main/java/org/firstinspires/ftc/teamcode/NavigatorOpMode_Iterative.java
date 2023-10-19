@@ -15,7 +15,7 @@ public class NavigatorOpMode_Iterative extends OpMode {
   private DriveSystem driveSystem;
   private RobotNavigator navigator;
   private PathPlanner pathPlanner;
-  private MotorActions motorActions;
+  private MotorActionState motorState;
   private ElapsedTime runtime;
 
   @Override
@@ -31,14 +31,14 @@ public class NavigatorOpMode_Iterative extends OpMode {
   }
   @Override
   public void loop() {
-    if (motorActions != null && driveSystem.tick(motorActions)) {
-      motorActions = pathPlanner.getNextAction();
+    if (motorState != null && driveSystem.tick(motorState)) {
+      motorState = pathPlanner.getNextAction();
     }
-    if (motorActions == null) {
+    if (motorState == null) {
       telemetry.addData("Status", "Finished");
     } else {
       navigator.updateWithTags(/* pass in AprilTagDetections */);
-      navigator.updateWithOffset(driveSystem.calculateUnexpectedOffset(motorActions));
+      navigator.updateWithOffset(driveSystem.calculateUnexpectedOffset(motorState));
       navigator.adjustMotion(actions);
       telemetry.addData("Status", "Running");
     }
