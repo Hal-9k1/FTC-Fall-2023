@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive;
 
 import javax.vecmath.Vector2d;
+import javax.vecmath.Matrix4d;
 import org.firstinspires.ftc.teamcode.drive.MotorActionState;
 import org.firstinspires.ftc.teamcode.input.InputInfo;
 
@@ -10,5 +11,5 @@ public interface DriveSystem {
   MotorActionState computeLinearSwivel(Vector2d direction, double angle, double speed);
   boolean tick(MotorActionState motorState);
   void tickInput(InputInfo input);
-  Vector2d getUnexpectedOffset(MotorActionState motorState);
+  Matrix4d getUnexpectedOffset(MotorActionState motorState);
 }

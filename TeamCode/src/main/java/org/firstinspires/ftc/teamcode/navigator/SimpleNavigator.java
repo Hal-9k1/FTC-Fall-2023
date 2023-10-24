@@ -73,7 +73,8 @@ public class SimpleNavigator implements RobotNavigator {
       // TODO: what to do if these calculations tell us we're below the floor or floating?
       Point2d robotPosFlatWS = new Point2d(robotPosWS.x, robotPos.y);
       sumPosition.add(robotPosFlatWS);
-      double robotYawWS = ; // radians
+      // From this person online: https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToEuler/index.htm
+      double robotYawWS = Math.atan2(-robotWS.m20, robotWS.m00);
       sumRotation += robotYawWS;
     }
     double avgRotation = sumRotation / detections.size();

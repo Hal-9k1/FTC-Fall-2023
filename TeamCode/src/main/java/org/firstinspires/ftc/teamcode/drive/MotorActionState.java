@@ -47,9 +47,15 @@ public class MotorActionState {
     checkMotorName(motorName);
     encoders.put(motorName);
   }
+  /**
+   * Gets the goal transform of this set of motor actions relative to the robot's initial transform.
+   *
+   * @return The goal transform in robot space relative to the pre-action transform.
+   */
   public Matrix4d getGoalTransform() {
     return new Matrix4d(goalTransform); // don't expose mutable object
   }
+
   private void checkMotorName(String motorName) {
     if (!motorNames.contains(motorName))
       throw IllegalArgumentException("Motor " + motorName + " invalid.");
@@ -73,23 +79,27 @@ public class MotorActionState {
       finalized = false;
     }
 
-    public void setInitialEncoder(String motorName, double value) {
+    public Builder setInitialEncoder(String motorName, double value) {
       checkFinalized();
       motorNames.add(motorName);
       initialEncoders.put(motorName, value);
+      return this;
     }
-    public void setSpeed(String motorName, double value) {
+    public Builder setSpeed(String motorName, double value) {
       checkFinalized();
       motorNames.add(motorName);
       speeds.put(motorName, value);
+      return this;
     }
-    public void setFinalEncoder(String motorName, double value) {
+    public Builder setFinalEncoder(String motorName, double value) {
       checkFinalized();
       motorNames.add(motorName);
       initialEncoders.put(motorName, value);
+      return this;
     }
-    public void setGoalTransform(Matrix4d goalTransform) {
+    public Builder setGoalTransform(Matrix4d goalTransform) {
       goalTransform = new Matrix4d(goalTransform);
+      return this;
     }
     public MotorActionState build() {
       checkFinalized();

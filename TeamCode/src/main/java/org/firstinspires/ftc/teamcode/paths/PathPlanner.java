@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.paths;
 
+import org.firstinspires.ftc.teamcode.drive.MotorActionState;
+
 public interface PathPlanner {
-  RobotWaypoint getNextAction();
-  // 
+  MotorActionState getNextAction();
+  // TODO: add interface to tell the planner about field state
 }

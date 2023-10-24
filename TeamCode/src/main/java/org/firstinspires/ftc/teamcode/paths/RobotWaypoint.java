@@ -8,7 +8,7 @@ public class RobotWaypoint {
   public final Vector2d obstacleNormal;
   public final double passLength;
 
-  public Waypoint(Point3d position, Vector3d obstacleNormal, double passLength) {
+  /* pkg private */ Waypoint(Point2d position, Point2d obstacleNormal, double passLength) {
     this.position = position;
     this.obstacleNormal = obstacleNormal;
     this.passLength = passLength;
