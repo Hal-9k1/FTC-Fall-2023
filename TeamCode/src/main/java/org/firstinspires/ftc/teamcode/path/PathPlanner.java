@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.paths;
+package org.firstinspires.ftc.teamcode.path;
 
 import org.firstinspires.ftc.teamcode.drive.MotorActionState;
 

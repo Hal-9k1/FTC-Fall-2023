@@ -40,20 +40,27 @@ public class SimpleNavigator implements RobotNavigator {
   }
 
   @Override
-  void updateFromTags(Matrix4d cameraTransformRobotSpace, List<AprilTagDetection> detections) {
+  public void updateWithTags(Matrix4d cameraTransformRobotSpace, List<AprilTagDetection> detections) {
     // WS = world space, RS = robot space, CS = camera space
     double sumRotation = 0; // radians
     Point2d sumPosition = new Point2d();
     for (AprilTagDetection detection : detections) {
       // from ftc-docs.firstinspires.org/en/latest/apriltag/vision_portal/apriltag_advanced_use/apriltag-advanced-use.html
-      Matrix3d tagRotCS = new Matrix3d().setIdentity();
-      tagRotCS // assuming rotation order XYZ
-        .mul(new Matrix3d().rotZ(AngleUnit.RADIANS.fromUnit(AngleUnit.DEGREES,
-          detection.ftcPose.yaw))
-        .mul(new Matrix3d().rotY(AngleUnit.RADIANS.fromUnit(AngleUnit.DEGREES,
-          detection.ftcPose.roll))
-        .mul(new Matrix3d().rotX(AngleUnit.RADIANS.fromUnit(AngleUnit.DEGREES,
+      Matrix3d tagRotCS = new Matrix3d();
+      tagRotCS.setIdentity();
+      Matrix3d rotZMat = new Matrix3d();
+      rotZMat.rotZ(AngleUnit.RADIANS.fromUnit(AngleUnit.DEGREES,
+        detection.ftcPose.yaw));
+      Matrix3d rotYMat = new Matrix3d();
+      rotYMat.rotY(AngleUnit.RADIANS.fromUnit(AngleUnit.DEGREES,
+          detection.ftcPose.roll));
+      Matrix3d rotXMat = new Matrix3d();
+      rotXMat.rotX(AngleUnit.RADIANS.fromUnit(AngleUnit.DEGREES,
           detection.ftcPose.pitch));
+      // assuming rotation order XYZ
+      tagRotCS.mul(rotZMat);
+      tagRotCS.mul(rotYMat);
+      tagRotCS.mul(rotXMat);
       Vector3d tagPosCS = new Vector3d(detection.ftcPose.x, detection.ftcPose.y,
         detection.ftcPose.z);
       // tagWS = robotWS * cameraRS * tagCS
@@ -66,34 +73,36 @@ public class SimpleNavigator implements RobotNavigator {
       Matrix4d tagWS = tagTransformsWorldSpace.get(detection.id);
       Matrix4d robotWS = new Matrix4d(tagWS);
       robotWS.mul(tagCSInv);
-      robotWS.mul(cameraRSINV);
+      robotWS.mul(cameraRSInv);
 
       Vector3d robotPosWS = new Vector3d();
-      robotPosWS.get(robotWS);
+      robotWS.get(robotPosWS);
       // TODO: what to do if these calculations tell us we're below the floor or floating?
-      Point2d robotPosFlatWS = new Point2d(robotPosWS.x, robotPos.y);
+      Point2d robotPosFlatWS = new Point2d(robotPosWS.x, robotPosWS.y);
       sumPosition.add(robotPosFlatWS);
       // From this person online: https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToEuler/index.htm
       double robotYawWS = Math.atan2(-robotWS.m20, robotWS.m00);
       sumRotation += robotYawWS;
     }
     double avgRotation = sumRotation / detections.size();
-    Point2d avgPosition = sumPosition.scale(1.0 / detections.size()); 
+    Point2d avgPosition = new Point2d();
+    avgPosition.scale(1.0 / detections.size(), sumPosition);
     Matrix3d avgRotationMat = new Matrix3d();
     avgRotationMat.rotZ(avgRotation);
     // TODO: old transform should be incorporated somehow instead of just being overwritten
-    robotTransform = new Matrix4d(avgRotationMat, new Vector3d(avgPosition.x, avgPosition.y, 0.0));
+    robotTransform = new Matrix4d(avgRotationMat,
+      new Vector3d(avgPosition.x, avgPosition.y, 0.0), 1.0);
   }
   @Override
-  void updateFromOffset(Matrix4d offset) {
-    robotTransform.multiply(offset);
+  public void updateWithOffset(Matrix4d offset) {
+    robotTransform.mul(offset);
   }
   @Override
-  void adjustActions(MotorActionState actions) {
-    
+  public void adjustActions(MotorActionState actions) {
+    // TODO: what to put here?
   }
   @Override
-  Matrix4d convertToRobotSpace(Matrix4d worldSpaceTransform) {
+  public Matrix4d convertToRobotSpace(Matrix4d worldSpaceTransform) {
     // worldSpaceTransform = robotTransform * robotSpaceTransform
     // robotTransform^-1 * worldSpaceTransform = robotSpaceTransform
     Matrix4d result = new Matrix4d();

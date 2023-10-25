@@ -15,8 +15,9 @@ public class MotorActionState {
   private Map<String, Double> encoders;
   private Matrix4d goalTransform;
 
-  private MotorActionState(Map<String, Double> initialEncoders, Map<String, Double> speeds,
-    Map<String, Double> finalEncoders, Matrix4d goalTransform) {
+  private MotorActionState(Set<String> motorNames, Map<String, Double> initialEncoders,
+    Map<String, Double> speeds, Map<String, Double> finalEncoders, Matrix4d goalTransform) {
+    this.motorNames = motorNames;
     this.initialEncoders = initialEncoders;
     this.speeds = speeds;
     this.finalEncoders = finalEncoders;
@@ -43,9 +44,9 @@ public class MotorActionState {
     checkMotorName(motorName);
     return encoders.get(motorName);
   }
-  public void setEncoder(String motorName) {
+  public void setEncoder(String motorName, double value) {
     checkMotorName(motorName);
-    encoders.put(motorName);
+    encoders.put(motorName, value);
   }
   /**
    * Gets the goal transform of this set of motor actions relative to the robot's initial transform.
@@ -57,8 +58,8 @@ public class MotorActionState {
   }
 
   private void checkMotorName(String motorName) {
-    if (!motorNames.contains(motorName))
-      throw IllegalArgumentException("Motor " + motorName + " invalid.");
+    if (!motorNames.contains(motorName)) {
+      throw new IllegalArgumentException("Motor " + motorName + " invalid.");
     }
   }
 
@@ -72,9 +73,9 @@ public class MotorActionState {
 
     public Builder() {
       motorNames = new HashSet<String>();
-      initialEncoders = new HashMap<Double, String>();
-      speeds = new HashMap<Double, String>();
-      finalEncoders = new HashMap<Double, String>();
+      initialEncoders = new HashMap<String, Double>();
+      speeds = new HashMap<String, Double>();
+      finalEncoders = new HashMap<String, Double>();
       goalTransform = null;
       finalized = false;
     }
@@ -111,7 +112,7 @@ public class MotorActionState {
     }
     private void checkFinalized() {
       if (finalized) {
-        throw IllegalStateException("Builder already finalized.");
+        throw new IllegalStateException("Builder already finalized.");
       }
     }
   }
