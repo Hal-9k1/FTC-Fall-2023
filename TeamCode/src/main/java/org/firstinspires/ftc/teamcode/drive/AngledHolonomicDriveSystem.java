@@ -1,15 +1,19 @@
 package org.firstinspires.ftc.teamcode.drive;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+
+import org.firstinspires.ftc.teamcode.RobotLogger;
+import org.firstinspires.ftc.teamcode.input.DriveInputInfo;
+
 import java.util.Arrays;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.input.DriveInputInfo;
 
 public class AngledHolonomicDriveSystem implements DriveSystem {
   private static final String LEFT_FRONT_NAME = "left_front_drive";
@@ -22,16 +26,22 @@ public class AngledHolonomicDriveSystem implements DriveSystem {
     RIGHT_FRONT_NAME,
     RIGHT_BACK_NAME
   };
-  private static final double WHEEL_RADIUS_METERS = 0.1;
-  private static final double WHEELSPAN_METERS = 4.5;
+  private static final double WHEEL_RADIUS_METERS = 0.04;
+  private static final double WHEELSPAN_METERS = 0.58;
   private static final double revLength = 2.0 * Math.PI * WHEEL_RADIUS_METERS;
   private static final double halfWheelspan = WHEELSPAN_METERS / 2.0;
-  private DcMotor[] motors;
+  private final RobotLogger logger;
+  private final DcMotor[] motors;
 
-  public AngledHolonomicDriveSystem(HardwareMap hardwareMap) {
-    motors = (DcMotor[]) Arrays.stream(motorNames)
+  public AngledHolonomicDriveSystem(RobotLogger logger, HardwareMap hardwareMap) {
+    this.logger = logger;
+    motors = Arrays.stream(motorNames)
       .map(name -> hardwareMap.get(DcMotor.class, name))
-      .toArray();
+      .toArray(DcMotor[]::new);
+    motors[0].setDirection(DcMotorSimple.Direction.FORWARD);
+    motors[1].setDirection(DcMotorSimple.Direction.FORWARD);
+    motors[2].setDirection(DcMotorSimple.Direction.REVERSE);
+    motors[3].setDirection(DcMotorSimple.Direction.REVERSE);
   }
   @Override
   public MotorActionState computeMove(Vector2d direction, double speed) {
@@ -44,18 +54,22 @@ public class AngledHolonomicDriveSystem implements DriveSystem {
   @Override
   public MotorActionState computeLinearSwivel(Vector2d direction, double angle, double speed) {
     double turnLength = halfWheelspan * angle;
-    // Corrosponds to motorNames order.
+    // Corresponds to motorNames order.
     // If lf points rf, lb points lf, rf points lf, rb points rf:
     double[] finalEncoders = new double[4];
     double[] speeds = new double[4];
-    calculateMotorPowers(direction.y, direction.x, turnLength, finalEncoders, speeds);
+    calculateMotorPowers(direction.y / revLength,
+            direction.x / revLength,
+            turnLength / revLength,
+            finalEncoders,
+            speeds);
     Matrix3d angleMat = new Matrix3d();
     angleMat.rotZ(angle);
-    MotorActionState.Builder builder = new MotorActionState.Builder()
+    MotorActionState.Builder builder = new MotorActionState.Builder(logger)
       .setGoalTransform(new Matrix4d(angleMat, new Vector3d(direction.x, direction.y, 0.0), 1.0));
     for (int i = 0; i < 4; ++i) {
       builder.setInitialEncoder(motorNames[i], motors[i].getCurrentPosition())
-        .setFinalEncoder(motorNames[i], finalEncoders[i])
+        .setFinalEncoder(motorNames[i], finalEncoders[i] + motors[i].getCurrentPosition())
         .setSpeed(motorNames[i], speeds[i]);
     }
     return builder.build();
@@ -67,21 +81,22 @@ public class AngledHolonomicDriveSystem implements DriveSystem {
     transform.get(translation);
     return computeLinearSwivel(new Vector2d(translation.x, translation.y), yaw, speed);
   }
+  @Override
+  public void halt() {
+    for (DcMotor motor : motors) {
+      motor.setPower(0);
+    }
+  }
+  @Override
   public boolean tick(MotorActionState motorState) {
     for (int i = 0; i < 4; ++i) {
       String name = motorNames[i];
       motors[i].setPower(motorState.getSpeed(name));
-      double encoder = (double)motors[i].getCurrentPosition();
-      double finalEncoder = motorState.getFinalEncoder(name);
-      // Have we passed our goal yet?
-      if (Math.signum((finalEncoder - encoder) * (finalEncoder -
-        motorState.getInitialEncoder(name))) == -1) {
-        return true;
-      }
-      motorState.setEncoder(name, encoder);
+      motorState.setEncoder(name, motors[i].getCurrentPosition());
     }
-    return false;
+    return motorState.getAverageProgress() >= 1.0;
   }
+  @Override
   public void tickInput(DriveInputInfo input) {
     double[] powers = new double[4];
     calculateMotorPowers(input.getDriveAxial(), input.getDriveLateral(), input.getDriveYaw(),
@@ -90,7 +105,17 @@ public class AngledHolonomicDriveSystem implements DriveSystem {
       motors[i].setPower(powers[i]);
     }
   }
+  @Override
   public Matrix4d getUnexpectedOffset(MotorActionState motorState) {
+    double[] offsets = new double[4]; // in meters
+    double avgProgress = motorState.getAverageProgress();
+    for (int i = 0; i < 4; ++i) {
+      String name = motorNames[i];
+      MotorConfigurationType type = motors[i].getMotorType();
+      offsets[i] = (motorState.getProgress(name) - avgProgress)
+              * (motorState.getFinalEncoder(name) - motorState.getInitialEncoder(name))
+              / type.getTicksPerRev() * revLength;
+    }
     // m0 = l + a - y
     // m1 = -l - a - y
     // m2 = -l + a + y
@@ -98,39 +123,37 @@ public class AngledHolonomicDriveSystem implements DriveSystem {
     // l = (m0 + m3) / 2
     // a = (m0 + m2) / 2
     // y = (m2 + m3) / 2
-    double[] progress = new double[4];
-    for (int i = 0; i < 4; ++i) {
-      String name = motorNames[i];
-      double initEnc = motorState.getInitialEncoder(name);
-      progress[i] = (motorState.getEncoder(name) - initEnc)
-        / (motorState.getFinalEncoder(name) - initEnc);
-    }
-    double[] offsets = new double[4];
-    double avgProgress = Arrays.stream(progress).average().getAsDouble();
-    for (int i = 0; i < 4; ++i) {
-      String name = motorNames[i];
-      double initEnc = motorState.getInitialEncoder(name);
-      offsets[i] = (motorState.getEncoder(name) - initEnc)
-        / (motorState.getFinalEncoder(name) - initEnc) - progress[i];
-    }
     double lateral = (offsets[0] + offsets[3]) / 2;
     double axial = (offsets[0] + offsets[2]) / 2;
     double yaw = (offsets[2] + offsets[3]) / 2;
     Matrix3d yawMat = new Matrix3d();
-    yawMat.rotZ(yaw);
+    yawMat.rotZ(yaw / (2.0 * Math.PI * halfWheelspan) );
     return new Matrix4d(yawMat, new Vector3d(lateral, axial, 0.0), 1.0);
   }
+  @Override
   public double getFootprintRadius() {
     return halfWheelspan;
   }
 
-  private void calculateMotorPowers(double axial, double lateral, double yaw, double[] rawPowers,
+  /**
+   * @param axial The number of motor revolutions in the axial (front-back) direction.
+   * @param lateral The number of motor revolutions in the lateral (left-right) direction.
+   * @param yaw The number of revolutions to turn counterclockwise.
+   * @param encoders An output array of size 4 that will hold the goal encoders for the drive
+   *                 motion.
+   * @param normalizedPowers An output array of size 4 that will hold motor powers (normalized from
+   *                         -1.0 to 1.0) for the drive motion.
+   */
+  private void calculateMotorPowers(double axial, double lateral, double yaw, double[] encoders,
     double[] normalizedPowers) {
-    rawPowers[0] =  lateral + axial - yaw; // lf
-    rawPowers[1] = -lateral - axial - yaw; // lb
-    rawPowers[2] = -lateral + axial + yaw; // rf
-    rawPowers[3] =  lateral - axial + yaw; // rb
-    double maxAbsEnc = Arrays.stream(rawPowers).map(x -> Math.abs(x)).max().getAsDouble();
+    double[] rawPowers = new double[4];
+    rawPowers[0] = motors[0].getMotorType().getTicksPerRev() * ( lateral + axial - yaw); // lf
+    rawPowers[1] = motors[1].getMotorType().getTicksPerRev() * (-lateral - axial - yaw); // lb
+    rawPowers[2] = motors[2].getMotorType().getTicksPerRev() * (-lateral + axial + yaw); // rf
+    rawPowers[3] = motors[3].getMotorType().getTicksPerRev() * ( lateral - axial + yaw); // rb
+    System.arraycopy(rawPowers, 0, encoders, 0, 4);
+    // never increase powers during normalization
+    double maxAbsEnc = Math.max(1.0, Arrays.stream(rawPowers).map(Math::abs).max().getAsDouble());
     normalizedPowers[0] = rawPowers[0] / maxAbsEnc;
     normalizedPowers[1] = rawPowers[1] / maxAbsEnc;
     normalizedPowers[2] = rawPowers[2] / maxAbsEnc;

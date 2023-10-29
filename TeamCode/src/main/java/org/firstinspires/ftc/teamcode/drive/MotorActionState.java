@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.drive;
 
-import java.util.HashSet;
+import org.firstinspires.ftc.teamcode.RobotLogger;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.vecmath.Matrix4d;
 
 // Independent of robot configuration.
@@ -21,6 +24,7 @@ public class MotorActionState {
     this.initialEncoders = initialEncoders;
     this.speeds = speeds;
     this.finalEncoders = finalEncoders;
+    this.encoders = new HashMap<>(initialEncoders);
     this.goalTransform = goalTransform;
   }
   
@@ -48,6 +52,17 @@ public class MotorActionState {
     checkMotorName(motorName);
     encoders.put(motorName, value);
   }
+  public double getProgress(String motorName) {
+    return (getEncoder(motorName) - getInitialEncoder(motorName))
+            / (getFinalEncoder(motorName)- getInitialEncoder(motorName));
+  }
+  public double getAverageProgress() {
+    return motorNames.stream().mapToDouble(this::getProgress).average().getAsDouble();
+  }
+  public double lerpProgress(String motorName, double progress) {
+    return (getFinalEncoder(motorName) - getInitialEncoder(motorName)) * progress
+            + getInitialEncoder(motorName);
+  }
   /**
    * Gets the goal transform of this set of motor actions relative to the robot's initial transform.
    *
@@ -70,8 +85,10 @@ public class MotorActionState {
     private Map<String, Double> finalEncoders;
     private Matrix4d goalTransform;
     private boolean finalized;
+    private RobotLogger logger;
 
-    public Builder() {
+    public Builder(RobotLogger logger) {
+      this.logger = logger;
       motorNames = new HashSet<String>();
       initialEncoders = new HashMap<String, Double>();
       speeds = new HashMap<String, Double>();
@@ -95,11 +112,11 @@ public class MotorActionState {
     public Builder setFinalEncoder(String motorName, double value) {
       checkFinalized();
       motorNames.add(motorName);
-      initialEncoders.put(motorName, value);
+      finalEncoders.put(motorName, value);
       return this;
     }
     public Builder setGoalTransform(Matrix4d goalTransform) {
-      goalTransform = new Matrix4d(goalTransform);
+      this.goalTransform = new Matrix4d(goalTransform);
       return this;
     }
     public MotorActionState build() {
@@ -107,6 +124,17 @@ public class MotorActionState {
       finalized = true;
       if (goalTransform == null) {
         throw new IllegalStateException("Goal transform has not been set.");
+      }
+      for (String motorName : motorNames) {
+        if (!initialEncoders.containsKey(motorName)) {
+          throw new IllegalStateException("Missing initial encoder for " + motorName + ".");
+        }
+        if (!speeds.containsKey(motorName)) {
+          throw new IllegalStateException("Missing speed for " + motorName + ".");
+        }
+        if (!finalEncoders.containsKey(motorName)) {
+          throw new IllegalStateException("Missing final encoder for " + motorName + ".");
+        }
       }
       return new MotorActionState(motorNames, initialEncoders, speeds, finalEncoders, goalTransform);
     }
