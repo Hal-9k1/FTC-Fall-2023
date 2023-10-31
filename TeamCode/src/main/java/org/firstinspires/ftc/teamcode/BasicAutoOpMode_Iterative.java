@@ -37,12 +37,14 @@ public class BasicAutoOpMode_Iterative extends OpMode {
     stateArrayDeque.add(driveSystem.computeMove(new Vector2d(0.0, 1.0), 0.01));
     motorStateQueue = stateArrayDeque;
 
+    logger.setFlushMode(false);
+    telemetry.update();
     telemetry.addData("Status", "Initialized");
+    logger.addTelemetry();
     telemetry.update();
   }
   @Override
   public void start() {
-    logger.setFlushMode(false);
     runtime = new ElapsedTime();
     motorState = motorStateQueue.poll();
   }

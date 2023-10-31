@@ -10,6 +10,6 @@ public class DefaultGamepadMapping {
   }
 
   public GamepadInputInfo generateInput() {
-    return new GamepadInputInfo(gamepad.left_stick_y, gamepad.left_stick_x, gamepad.left_stick_y);
+    return new GamepadInputInfo(-gamepad.left_stick_y, gamepad.left_stick_x, gamepad.right_stick_x);
   }
 }
