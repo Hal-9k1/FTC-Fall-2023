@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.AngledHolonomicDriveSystem;
+import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
+import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.input.DefaultGamepadMapping;
 
@@ -21,7 +22,7 @@ public class DriveOpMode_Iterative extends OpMode {
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new AngledHolonomicDriveSystem(logger, hardwareMap);
+    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
     mapping = new DefaultGamepadMapping(gamepad1);
 
     telemetry.addData("Status", "Initialized");

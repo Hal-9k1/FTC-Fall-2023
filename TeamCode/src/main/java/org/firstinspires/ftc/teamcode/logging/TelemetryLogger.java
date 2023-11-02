@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.logging;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 
-/* pkg private */ class TelemetryLogger implements RobotLogger {
+public class TelemetryLogger implements RobotLogger {
   private final ArrayList<String> msgs;
   private boolean wasAutoClear;
   private boolean flush;

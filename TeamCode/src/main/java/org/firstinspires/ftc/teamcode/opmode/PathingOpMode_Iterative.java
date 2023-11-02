@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.AngledHolonomicDriveSystem;
+import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
+import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MotorActionState;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
@@ -33,12 +34,12 @@ public class PathingOpMode_Iterative extends OpMode {
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new AngledHolonomicDriveSystem(logger, hardwareMap);
+    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
     Matrix4d initialRobotTransform = new Matrix4d();
     initialRobotTransform.setIdentity();
     navigator = new SimpleNavigator(initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
-    pathPlanner = new BlindPathPlanner(driveSystem, navigator);
+    pathPlanner = new BlindPathPlanner(driveSystem, navigator, logger);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();
@@ -55,6 +56,7 @@ public class PathingOpMode_Iterative extends OpMode {
   public void loop() {
     if (motorState != null && driveSystem.tick(motorState)) {
       motorState = pathPlanner.getNextAction();
+      driveSystem.init(motorState);
     }
     if (motorState == null) {
       telemetry.addData("Status", "Finished");

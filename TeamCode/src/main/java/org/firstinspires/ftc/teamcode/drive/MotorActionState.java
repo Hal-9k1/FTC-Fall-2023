@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.drive;
 
-import org.firstinspires.ftc.teamcode.RobotLogger;
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +32,10 @@ public class MotorActionState {
     checkMotorName(motorName);
     return initialEncoders.get(motorName);
   }
+  public void setInitialEncoder(String motorName, double value) {
+    checkMotorName(motorName);
+    initialEncoders.put(motorName, value);
+  }
   public double getSpeed(String motorName) {
     checkMotorName(motorName);
     return speeds.get(motorName);
@@ -54,7 +58,7 @@ public class MotorActionState {
   }
   public double getProgress(String motorName) {
     return (getEncoder(motorName) - getInitialEncoder(motorName))
-            / (getFinalEncoder(motorName)- getInitialEncoder(motorName));
+            / (getFinalEncoder(motorName) - getInitialEncoder(motorName));
   }
   public double getAverageProgress() {
     return motorNames.stream().mapToDouble(this::getProgress).average().getAsDouble();

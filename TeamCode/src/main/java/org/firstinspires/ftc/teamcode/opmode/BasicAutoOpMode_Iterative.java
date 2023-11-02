@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -6,8 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.AngledHolonomicDriveSystem;
+import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
+import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MotorActionState;
 
 import java.util.ArrayDeque;
@@ -32,9 +33,13 @@ public class BasicAutoOpMode_Iterative extends OpMode {
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new AngledHolonomicDriveSystem(logger, hardwareMap);
+    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
     ArrayDeque<MotorActionState> stateArrayDeque = new ArrayDeque<>();
-    stateArrayDeque.add(driveSystem.computeMove(new Vector2d(0.0, 1.0), 0.01));
+    stateArrayDeque.add(driveSystem.computeTurn(-Math.PI, 1.0));
+    stateArrayDeque.add(driveSystem.computeMove(new Vector2d(0.0, 1.0), 1.0));
+    stateArrayDeque.add(driveSystem.computeMove(new Vector2d(0.5, 0.5), 1.0));
+    stateArrayDeque.add(driveSystem.computeLinearSwivel(new Vector2d(1.0, 1.0),
+      -Math.PI / 2, 1.0));
     motorStateQueue = stateArrayDeque;
 
     logger.setFlushMode(false);
@@ -47,11 +52,16 @@ public class BasicAutoOpMode_Iterative extends OpMode {
   public void start() {
     runtime = new ElapsedTime();
     motorState = motorStateQueue.poll();
+    driveSystem.init(motorState);
   }
   @Override
   public void loop() {
     if (motorState != null && driveSystem.tick(motorState)) {
       motorState = motorStateQueue.poll();
+      if (motorState != null) {
+        driveSystem.init(motorState);
+      }
+      logger.log("Next action.");
     }
     if (motorState == null) {
       telemetry.addData("Status", "Finished");
