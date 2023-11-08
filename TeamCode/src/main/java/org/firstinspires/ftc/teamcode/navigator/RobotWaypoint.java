@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.path;
+package org.firstinspires.ftc.teamcode.navigator;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;

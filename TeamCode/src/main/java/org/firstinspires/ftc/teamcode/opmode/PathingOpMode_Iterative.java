@@ -9,37 +9,37 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
-import org.firstinspires.ftc.teamcode.drive.MotorActionState;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
 import org.firstinspires.ftc.teamcode.navigator.SimpleNavigator;
+import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
+import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
 import org.firstinspires.ftc.teamcode.path.BlindPathPlanner;
 import org.firstinspires.ftc.teamcode.path.PathPlanner;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 
-import java.util.ArrayList;
-
 import javax.vecmath.Matrix4d;
 
-@Autonomous(name="Blind Pathing Auto", group="Iterative OpMode")
+@Autonomous(name="Unplanned Pathing Auto", group="Iterative OpMode")
 public class PathingOpMode_Iterative extends OpMode {
+  private TelemetryLogger logger;
   private DriveSystem driveSystem;
+  private RobotPilot pilot;
   private RobotNavigator navigator;
   private PathPlanner pathPlanner;
-  private MotorActionState motorState;
   private ElapsedTime runtime;
   private Matrix4d cameraTransformRS;
-  private TelemetryLogger logger;
 
   @Override
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
+    driveSystem = new MecanumDriveSystem(hardwareMap);
     Matrix4d initialRobotTransform = new Matrix4d();
     initialRobotTransform.setIdentity();
-    navigator = new SimpleNavigator(initialRobotTransform,
+    pilot = new SimplePilot(driveSystem, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
-    pathPlanner = new BlindPathPlanner(driveSystem, navigator, logger);
+    navigator = new SimpleNavigator();
+    pathPlanner = new BlindPathPlanner(navigator);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();
@@ -54,21 +54,7 @@ public class PathingOpMode_Iterative extends OpMode {
   }
   @Override
   public void loop() {
-    if (motorState != null && driveSystem.tick(motorState)) {
-      motorState = pathPlanner.getNextAction();
-      driveSystem.init(motorState);
-    }
-    if (motorState == null) {
-      telemetry.addData("Status", "Finished");
-      driveSystem.halt();
-    } else {
-      navigator.updateWithTags(cameraTransformRS, new ArrayList<>()); // TODO: detect tags
-      navigator.updateWithOffset(driveSystem.getUnexpectedOffset(motorState));
-      navigator.adjustActions(motorState);
-      driveSystem.tick(motorState);
-      telemetry.addData("Status", "Running");
-      telemetry.addData("Runtime", runtime.toString());
-    }
+
     logger.addTelemetry();
     telemetry.update();
   }

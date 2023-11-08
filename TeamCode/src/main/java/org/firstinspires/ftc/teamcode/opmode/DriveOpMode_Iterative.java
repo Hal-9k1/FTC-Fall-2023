@@ -22,7 +22,7 @@ public class DriveOpMode_Iterative extends OpMode {
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
+    driveSystem = new MecanumDriveSystem(hardwareMap);
     mapping = new DefaultGamepadMapping(gamepad1);
 
     telemetry.addData("Status", "Initialized");

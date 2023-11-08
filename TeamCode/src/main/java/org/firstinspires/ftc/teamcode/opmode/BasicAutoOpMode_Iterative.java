@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
-import org.firstinspires.ftc.teamcode.drive.MotorActionState;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import javax.vecmath.Vector2d;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Vector3d;
 
 /**
  * Executes a queue of MotorActionStates without using a RobotNavigator or PathPlanner. Consequently
@@ -24,23 +24,33 @@ import javax.vecmath.Vector2d;
 @Autonomous(name="Basic Auto", group="Iterative OpMode")
 public class BasicAutoOpMode_Iterative extends OpMode {
   private DriveSystem driveSystem;
-  private MotorActionState motorState;
   private ElapsedTime runtime;
-  private Queue<MotorActionState> motorStateQueue;
+  private int stageNum;
+  private Queue<Matrix4d> swivelQueue;
+  private Matrix4d currentSwivel;
   private TelemetryLogger logger;
 
   @Override
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
-    ArrayDeque<MotorActionState> stateArrayDeque = new ArrayDeque<>();
-    stateArrayDeque.add(driveSystem.computeTurn(-Math.PI, 1.0));
-    stateArrayDeque.add(driveSystem.computeMove(new Vector2d(0.0, 1.0), 1.0));
-    stateArrayDeque.add(driveSystem.computeMove(new Vector2d(0.5, 0.5), 1.0));
-    stateArrayDeque.add(driveSystem.computeLinearSwivel(new Vector2d(1.0, 1.0),
-      -Math.PI / 2, 1.0));
-    motorStateQueue = stateArrayDeque;
+    driveSystem = new MecanumDriveSystem(hardwareMap);
+
+    stageNum = 0;
+    swivelQueue = new ArrayDeque<>();
+    Matrix4d swivel = new Matrix4d();
+    swivel.setTranslation(new Vector3d(0.0, 1.0, 0.0));
+    swivelQueue.add(swivel);
+    swivel = new Matrix4d();
+    swivel.rotZ(Math.PI / 4);
+    swivelQueue.add(swivel);
+    swivel = new Matrix4d();
+    swivel.rotZ(-Math.PI / 4);
+    swivel.setTranslation(new Vector3d(0.0, 1.0, 0.0));
+    swivelQueue.add(swivel);
+    swivel = new Matrix4d();
+    swivel.setTranslation(new Vector3d(-2.0, -2.0, 0.0));
+    swivelQueue.add(swivel);
 
     logger.setFlushMode(false);
     telemetry.update();
@@ -51,22 +61,20 @@ public class BasicAutoOpMode_Iterative extends OpMode {
   @Override
   public void start() {
     runtime = new ElapsedTime();
-    motorState = motorStateQueue.poll();
-    driveSystem.init(motorState);
   }
   @Override
   public void loop() {
-    if (motorState != null && driveSystem.tick(motorState)) {
-      motorState = motorStateQueue.poll();
-      if (motorState != null) {
-        driveSystem.init(motorState);
-      }
-      logger.log("Next action.");
+    if (stageNum < (int)(runtime.milliseconds() / 1000)) {
+      stageNum++;
+      currentSwivel = swivelQueue.poll();
+      driveSystem.startNewAction();
     }
-    if (motorState == null) {
-      telemetry.addData("Status", "Finished");
+    if (currentSwivel == null) {
       driveSystem.halt();
+      telemetry.addData("Status", "Finished");
     } else {
+      driveSystem.swivel(currentSwivel, 1.0);
+      driveSystem.exec();
       telemetry.addData("Status", "Running");
       telemetry.addData("Runtime", runtime.toString());
     }
