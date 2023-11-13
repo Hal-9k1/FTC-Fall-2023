@@ -2,10 +2,10 @@ package org.firstinspires.ftc.teamcode.input;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-public class DefaultGamepadMapping {
+public class OmniGamepadMapping {
   private Gamepad gamepad;
 
-  public DefaultGamepadMapping(Gamepad gamepad) {
+  public OmniGamepadMapping(Gamepad gamepad) {
     this.gamepad = gamepad;
   }
 

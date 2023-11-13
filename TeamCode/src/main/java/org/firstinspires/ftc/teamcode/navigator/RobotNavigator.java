@@ -4,6 +4,6 @@ import org.firstinspires.ftc.teamcode.path.RobotGoal;
 
 public interface RobotNavigator {
   void setGoal(RobotGoal goal);
-  RobotWaypoint getNextWaypoint();
+  boolean tick();
   // TODO: notify about obstacles
 }

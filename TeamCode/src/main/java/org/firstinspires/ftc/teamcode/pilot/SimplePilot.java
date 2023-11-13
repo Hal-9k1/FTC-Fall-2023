@@ -26,14 +26,12 @@ public class SimplePilot implements RobotPilot {
   private Matrix4d robotTransformAS;
   private Matrix4d destinationFS;
   private Map<Integer, Matrix4d> tagTransformsWS;
-  private boolean stopped;
 
   public SimplePilot(DriveSystem driveSystem, Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
     this.driveSystem = driveSystem;
     robotTransformFS = new Matrix4d(initialRobotTransform);
     destinationFS = new Matrix4d();
     tagTransformsWS = new HashMap<Integer, Matrix4d>();
-    stopped = true;
     for (AprilTagMetadata tagData : tagLibrary.getAllTags()) {
       Vector3d tagPosition = new Vector3d(
         DistanceUnit.METER.fromUnit(tagData.distanceUnit, tagData.fieldPosition.get(0)),
@@ -57,7 +55,7 @@ public class SimplePilot implements RobotPilot {
   @Override
   public void setDestination(Matrix4d destination) {
     destinationFS.set(destination);
-    stopped = false;
+    robotTransformAS.setIdentity();
   }
 
   @Override
@@ -121,14 +119,9 @@ public class SimplePilot implements RobotPilot {
   }
   @Override
   public boolean tick() {
-    if (stopped) {
-      return false;
-    }
     Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
-    Matrix4d deltaASTransform = new Matrix4d();
-    deltaASTransform.invert(robotTransformAS);
-    deltaASTransform.mul(newRobotTransformAS);
-    updateWithOffset(deltaASTransform);
+    updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
+    robotTransformAS = newRobotTransformAS;
 
     Matrix4d destinationRS = convertToRS(destinationFS);
     Vector3d destTranslationRS = new Vector3d();
@@ -136,7 +129,6 @@ public class SimplePilot implements RobotPilot {
     double destAngleRS = MatrixMagic.getYaw(destinationRS);
     if (destTranslationRS.lengthSquared() < DISTANCE_EPSILON || destAngleRS < ANGLE_EPSILON) {
       driveSystem.halt();
-      stopped = true;
       return true;
     } else {
       driveSystem.swivel(destinationRS, 1.0);
@@ -144,13 +136,13 @@ public class SimplePilot implements RobotPilot {
       return false;
     }
   }
-
   private Matrix4d convertToRS(Matrix4d transformFS) {
     // transformFS = robotTransform * transformRS
     // robotTransform^-1 * transformFS = transformRS
-    Matrix4d result = new Matrix4d();
-    result.invert(robotTransformFS);
-    result.mul(transformFS);
-    return result;
+    return MatrixMagic.invMul(robotTransformFS, transformFS);
+  }
+  @Override
+  public double getRobotBoundingRadius() {
+    return driveSystem.getRobotBoundingRadius();
   }
 }

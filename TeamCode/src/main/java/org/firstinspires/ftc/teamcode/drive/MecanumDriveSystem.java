@@ -15,6 +15,9 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+/**
+ * A DriveSystem using four squarely positioned Mecanum wheels on a rectangular chassis.
+ */
 public class MecanumDriveSystem implements DriveSystem {
   private static final String LEFT_FRONT_NAME = "left_front_drive";
   private static final String LEFT_BACK_NAME = "left_back_drive";
@@ -28,6 +31,7 @@ public class MecanumDriveSystem implements DriveSystem {
   };
   private static final double WHEEL_SPAN_METERS = 0.58;
   private static final double HALF_WHEEL_SPAN = WHEEL_SPAN_METERS / 2.0;
+  private static final double BOUNDING_RADIUS = HALF_WHEEL_SPAN + 0.04;
   private static final Map<String, Double> GEARBOX_RATIOS = new HashMap<>();
   private static final Map<String, Double> WHEEL_RADII_METERS = new HashMap<>();
   private static final Map<String, Double> REV_LENGTHS = new HashMap<>();
@@ -135,8 +139,8 @@ public class MecanumDriveSystem implements DriveSystem {
     return new Matrix4d(yawMat, new Vector3d(lateral, axial, 0.0), 1.0);
   }
   @Override
-  public double getFootprintRadius() {
-    return HALF_WHEEL_SPAN;
+  public double getRobotBoundingRadius() {
+    return BOUNDING_RADIUS;
   }
 
   /**

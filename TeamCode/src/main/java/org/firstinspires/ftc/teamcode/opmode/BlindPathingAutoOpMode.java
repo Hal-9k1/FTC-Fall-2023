@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
-import org.firstinspires.ftc.teamcode.navigator.SimpleNavigator;
+import org.firstinspires.ftc.teamcode.navigator.BeelineNavigator;
 import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
 import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
 import org.firstinspires.ftc.teamcode.path.BlindPathPlanner;
@@ -19,8 +19,13 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 
 import javax.vecmath.Matrix4d;
 
-@Autonomous(name="Unplanned Pathing Auto", group="Iterative OpMode")
-public class PathingOpMode_Iterative extends OpMode {
+/**
+ * Uses a pilot, BeelineNavigator, and a planner to blindly execute preset goals.
+ * Will not respond to game state, AprilTags, or obstacles, but technically implements the full
+ * four-layer stack.
+ */
+@Autonomous(name="Blind Pathing Auto", group="Iterative OpMode")
+public class BlindPathingAutoOpMode extends OpMode {
   private TelemetryLogger logger;
   private DriveSystem driveSystem;
   private RobotPilot pilot;
@@ -38,7 +43,7 @@ public class PathingOpMode_Iterative extends OpMode {
     initialRobotTransform.setIdentity();
     pilot = new SimplePilot(driveSystem, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
-    navigator = new SimpleNavigator();
+    navigator = new BeelineNavigator(pilot);
     pathPlanner = new BlindPathPlanner(navigator);
 
     telemetry.addData("Status", "Initialized");
@@ -48,13 +53,17 @@ public class PathingOpMode_Iterative extends OpMode {
   @Override
   public void start() {
     runtime = new ElapsedTime();
-    motorState = pathPlanner.getNextAction();
     cameraTransformRS = new Matrix4d();
     cameraTransformRS.setIdentity();
   }
   @Override
   public void loop() {
-
+    if (pathPlanner.tick()) {
+      telemetry.addData("Status", "Finished");
+    } else {
+      telemetry.addData("Status", "Running");
+      telemetry.addData("Runtime", runtime.toString());
+    }
     logger.addTelemetry();
     telemetry.update();
   }

@@ -8,7 +8,8 @@ import javax.vecmath.Matrix4d;
 
 public interface RobotPilot {
   void setDestination(Matrix4d destination);
-  void updateWithTags(Matrix4d cameraTransform, List<AprilTagDetection> detections);
+  void updateWithTags(Matrix4d cameraTransformRobotSpace, List<AprilTagDetection> detections);
   void updateWithOffset(Matrix4d offset);
   boolean tick();
+  double getRobotBoundingRadius();
 }

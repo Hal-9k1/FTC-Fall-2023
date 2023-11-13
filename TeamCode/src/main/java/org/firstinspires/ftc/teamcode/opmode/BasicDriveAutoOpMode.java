@@ -17,24 +17,26 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 
 /**
- * Executes a queue of MotorActionStates without using a RobotNavigator or PathPlanner. Consequently
- * has no idea where it is, is blinder than blind, and will not even correct for unexpected encoder
- * offsets.
+ * Executes a queue of swivels for fixed durations without using a pilot, navigator, or planner.
+ * Consequently has no idea where it is, is blinder than blind, and will not even correct for
+ * unexpected encoder offsets.
  */
 @Autonomous(name="Basic Auto", group="Iterative OpMode")
-public class BasicAutoOpMode_Iterative extends OpMode {
+public class BasicDriveAutoOpMode extends OpMode {
   private DriveSystem driveSystem;
   private ElapsedTime runtime;
   private int stageNum;
   private Queue<Matrix4d> swivelQueue;
   private Matrix4d currentSwivel;
   private TelemetryLogger logger;
+  private boolean finished;
 
   @Override
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
     driveSystem = new MecanumDriveSystem(hardwareMap);
+    finished = false;
 
     stageNum = 0;
     swivelQueue = new ArrayDeque<>();
@@ -64,13 +66,17 @@ public class BasicAutoOpMode_Iterative extends OpMode {
   }
   @Override
   public void loop() {
-    if (stageNum < (int)(runtime.milliseconds() / 1000)) {
+    if (!finished && stageNum < (int)(runtime.milliseconds() / 1000)) {
       stageNum++;
       currentSwivel = swivelQueue.poll();
-      driveSystem.startNewAction();
+      if (currentSwivel == null) {
+        finished = true;
+      } else {
+        driveSystem.startNewAction();
+        driveSystem.halt();
+      }
     }
-    if (currentSwivel == null) {
-      driveSystem.halt();
+    if (finished) {
       telemetry.addData("Status", "Finished");
     } else {
       driveSystem.swivel(currentSwivel, 1.0);
