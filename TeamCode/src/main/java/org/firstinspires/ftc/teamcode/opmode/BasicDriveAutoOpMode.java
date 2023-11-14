@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.MatrixMagic;
 import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
@@ -21,7 +22,7 @@ import javax.vecmath.Vector3d;
  * Consequently has no idea where it is, is blinder than blind, and will not even correct for
  * unexpected encoder offsets.
  */
-@Autonomous(name="Basic Auto", group="Iterative OpMode")
+@Autonomous(name="Basic Drive Auto", group="Iterative OpMode")
 public class BasicDriveAutoOpMode extends OpMode {
   private DriveSystem driveSystem;
   private ElapsedTime runtime;
@@ -38,18 +39,23 @@ public class BasicDriveAutoOpMode extends OpMode {
     driveSystem = new MecanumDriveSystem(hardwareMap);
     finished = false;
 
-    stageNum = 0;
+    stageNum = -1;
     swivelQueue = new ArrayDeque<>();
-    Matrix4d swivel = new Matrix4d();
+    Matrix4d swivel;
+
+    swivel = new Matrix4d();
     swivel.setTranslation(new Vector3d(0.0, 1.0, 0.0));
     swivelQueue.add(swivel);
+
     swivel = new Matrix4d();
     swivel.rotZ(Math.PI / 4);
     swivelQueue.add(swivel);
+
     swivel = new Matrix4d();
     swivel.rotZ(-Math.PI / 4);
     swivel.setTranslation(new Vector3d(0.0, 1.0, 0.0));
     swivelQueue.add(swivel);
+
     swivel = new Matrix4d();
     swivel.setTranslation(new Vector3d(-2.0, -2.0, 0.0));
     swivelQueue.add(swivel);
@@ -71,9 +77,9 @@ public class BasicDriveAutoOpMode extends OpMode {
       currentSwivel = swivelQueue.poll();
       if (currentSwivel == null) {
         finished = true;
+        driveSystem.halt();
       } else {
         driveSystem.startNewAction();
-        driveSystem.halt();
       }
     }
     if (finished) {
@@ -82,6 +88,9 @@ public class BasicDriveAutoOpMode extends OpMode {
       driveSystem.swivel(currentSwivel, 1.0);
       driveSystem.exec();
       telemetry.addData("Status", "Running");
+      telemetry.addData("Stage", stageNum);
+      telemetry.addData("Current swivel yaw", MatrixMagic.getYaw(currentSwivel));
+      telemetry.addData("Current swivel", "\n" + currentSwivel.toString());
       telemetry.addData("Runtime", runtime.toString());
     }
     logger.addTelemetry();

@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.pilot;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.MatrixMagic;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
@@ -26,6 +28,7 @@ public class SimplePilot implements RobotPilot {
   private Matrix4d robotTransformAS;
   private Matrix4d destinationFS;
   private Map<Integer, Matrix4d> tagTransformsWS;
+  private RobotLogger logger;
 
   public SimplePilot(DriveSystem driveSystem, Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
     this.driveSystem = driveSystem;
@@ -144,5 +147,14 @@ public class SimplePilot implements RobotPilot {
   @Override
   public double getRobotBoundingRadius() {
     return driveSystem.getRobotBoundingRadius();
+  }
+
+  @Override
+  public void addTelemetry(Telemetry telemetry) {
+    Vector3d robotTranslationFS = new Vector3d();
+    robotTransformFS.get(robotTranslationFS);
+    double robotRotationFS = MatrixMagic.getYaw(robotTransformFS);
+    telemetry.addData("Robot position (meters)", robotTranslationFS);
+    telemetry.addData("Robot rotation (radians)", robotRotationFS);
   }
 }

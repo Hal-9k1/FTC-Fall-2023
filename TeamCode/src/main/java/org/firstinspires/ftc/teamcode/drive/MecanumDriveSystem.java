@@ -158,9 +158,6 @@ public class MecanumDriveSystem implements DriveSystem {
     powers.forEach((k, v) -> powers.put(k, v * ticksPerRev.get(k) / REV_LENGTHS.get(k)));
     return powers;
   }
-  private double getSpeedFac(double averageProgress) {
-    return 3 * (averageProgress - Math.pow(averageProgress, 2)) + 0.250;
-  }
   private void normalizePowers(Map<String, Double> powers) {
     // never increase powers during normalization
     double maxAbsEnc = Math.max(1.0, powers.values().stream().mapToDouble(v -> v)

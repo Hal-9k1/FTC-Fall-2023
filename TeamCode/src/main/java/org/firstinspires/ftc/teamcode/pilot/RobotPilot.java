@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pilot;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
@@ -12,4 +13,5 @@ public interface RobotPilot {
   void updateWithOffset(Matrix4d offset);
   boolean tick();
   double getRobotBoundingRadius();
+  default void addTelemetry(Telemetry telemetry) {}
 }

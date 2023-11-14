@@ -6,15 +6,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
-import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
+import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
+import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.navigator.BeelineNavigator;
-import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
-import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
+import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
 import org.firstinspires.ftc.teamcode.path.BlindPathPlanner;
 import org.firstinspires.ftc.teamcode.path.PathPlanner;
+import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
+import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 
 import javax.vecmath.Matrix4d;
@@ -32,7 +32,6 @@ public class BlindPathingAutoOpMode extends OpMode {
   private RobotNavigator navigator;
   private PathPlanner pathPlanner;
   private ElapsedTime runtime;
-  private Matrix4d cameraTransformRS;
 
   @Override
   public void init() {
@@ -53,8 +52,6 @@ public class BlindPathingAutoOpMode extends OpMode {
   @Override
   public void start() {
     runtime = new ElapsedTime();
-    cameraTransformRS = new Matrix4d();
-    cameraTransformRS.setIdentity();
   }
   @Override
   public void loop() {
@@ -64,6 +61,7 @@ public class BlindPathingAutoOpMode extends OpMode {
       telemetry.addData("Status", "Running");
       telemetry.addData("Runtime", runtime.toString());
     }
+    pilot.addTelemetry(telemetry);
     logger.addTelemetry();
     telemetry.update();
   }
