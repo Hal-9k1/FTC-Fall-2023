@@ -1,13 +1,21 @@
 package org.firstinspires.ftc.teamcode.input;
 
-/* pkg private */ class GamepadInputInfo implements DriveInputInfo {
+import android.media.Image;
+
+/* pkg private */ class GamepadInputInfo implements DriveInputInfo, PlaneInputInfo {
   private double axial;
   private double lateral;
   private double yaw;
-  /* pkg private */ GamepadInputInfo(double axial, double lateral, double yaw) {
+  private boolean shouldLaunchPlane;
+
+  /* pkg private */ GamepadInputInfo(double axial,
+                                     double lateral,
+                                     double yaw,
+                                     boolean shouldLaunchPlane) {
     this.axial = axial;
     this.lateral = lateral;
     this.yaw = yaw;
+    this.shouldLaunchPlane = shouldLaunchPlane;
   }
 
   @Override
@@ -22,4 +30,6 @@ package org.firstinspires.ftc.teamcode.input;
   public double getDriveYaw() {
     return yaw;
   }
+  @Override
+  public boolean getShouldLaunch() { return shouldLaunchPlane; }
 }

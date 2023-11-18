@@ -9,17 +9,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
-import org.firstinspires.ftc.teamcode.input.OmniGamepadMapping;
+import org.firstinspires.ftc.teamcode.input.DefaultGamepadMapping;
+import org.firstinspires.ftc.teamcode.plane.PlaneLauncher;
+import org.firstinspires.ftc.teamcode.plane.TensionLauncher;
 
-/**
- * Feeds input info from an input mapping to the drive system and other robot components.
- * Likely the only TeleOpMode we'll ever need unless drivers frequently request different input
- * mappings.
- */
-@TeleOp(name="Drive", group="Iterative OpMode")
-public class DriveTeleOpMode extends OpMode {
+@TeleOp(name="Plane Drive", group="Iterative OpMode")
+public class PlaneDriveTeleOpMode extends OpMode {
   private DriveSystem driveSystem;
-  private OmniGamepadMapping mapping;
+  private PlaneLauncher planeLauncher;
+  private DefaultGamepadMapping mapping;
   private ElapsedTime runtime;
   private TelemetryLogger logger;
 
@@ -27,8 +25,9 @@ public class DriveTeleOpMode extends OpMode {
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new MecanumDriveSystem(hardwareMap);
-    mapping = new OmniGamepadMapping(gamepad1);
+    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
+    planeLauncher = new TensionLauncher(hardwareMap);
+    mapping = new DefaultGamepadMapping(gamepad1);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();
@@ -43,6 +42,7 @@ public class DriveTeleOpMode extends OpMode {
   public void loop() {
     mapping.generateInput();
     driveSystem.tickInput(mapping.getInput());
+    planeLauncher.tickInput(mapping.getInput());
     telemetry.addData("Status", "Running");
     telemetry.addData("Runtime", runtime.toString());
     logger.addTelemetry();
