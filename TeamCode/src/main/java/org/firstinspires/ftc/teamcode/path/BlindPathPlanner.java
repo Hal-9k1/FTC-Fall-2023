@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.path;
 
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
 
 import java.util.ArrayDeque;
@@ -12,8 +13,10 @@ import javax.vecmath.Vector3d;
 public class BlindPathPlanner implements PathPlanner {
   private Queue<RobotGoal> goalQueue;
   private RobotNavigator navigator;
+  private RobotLogger logger;
   private boolean stopped;
-  public BlindPathPlanner(RobotNavigator navigator) {
+  public BlindPathPlanner(RobotLogger logger, RobotNavigator navigator) {
+    this.logger = logger;
     goalQueue = new ArrayDeque<>();
     populateGoalQueue(goalQueue);
     this.navigator = navigator;
@@ -22,6 +25,7 @@ public class BlindPathPlanner implements PathPlanner {
   }
 
   private void processNextGoal() {
+    logger.log("Processing next goal");
     RobotGoal goal = goalQueue.poll();
     if (goal == null) {
       stopped = true;

@@ -30,9 +30,12 @@ public class SimplePilot implements RobotPilot {
   private Map<Integer, Matrix4d> tagTransformsWS;
   private RobotLogger logger;
 
-  public SimplePilot(DriveSystem driveSystem, Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
+  public SimplePilot(RobotLogger logger, DriveSystem driveSystem, Matrix4d allianceOriginTransform,
+                     Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
+    this.logger = logger;
     this.driveSystem = driveSystem;
     robotTransformFS = new Matrix4d(initialRobotTransform);
+    robotTransformAS = new Matrix4d();
     destinationFS = new Matrix4d();
     tagTransformsWS = new HashMap<Integer, Matrix4d>();
     for (AprilTagMetadata tagData : tagLibrary.getAllTags()) {
@@ -47,7 +50,9 @@ public class SimplePilot implements RobotPilot {
         ftcTagRot.get(1, 0), ftcTagRot.get(1, 1), ftcTagRot.get(1, 2),
         ftcTagRot.get(2, 0), ftcTagRot.get(2, 1), ftcTagRot.get(2, 2)
       );
-      tagTransformsWS.put(tagData.id, new Matrix4d(tagRotation, tagPosition, 1.0));
+      Matrix4d tagTransform = new Matrix4d(tagRotation, tagPosition, 1.0); // alliance space
+      tagTransform.mul(allianceOriginTransform); // field space
+      tagTransformsWS.put(tagData.id, tagTransform);
     }
   }
 
@@ -131,6 +136,7 @@ public class SimplePilot implements RobotPilot {
     destinationRS.get(destTranslationRS);
     double destAngleRS = MatrixMagic.getYaw(destinationRS);
     if (destTranslationRS.lengthSquared() < DISTANCE_EPSILON || destAngleRS < ANGLE_EPSILON) {
+      logger.log("Reached destination");
       driveSystem.halt();
       return true;
     } else {

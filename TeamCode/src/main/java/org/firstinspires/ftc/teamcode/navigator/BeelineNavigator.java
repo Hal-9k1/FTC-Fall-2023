@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.navigator;
 
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.teamcode.path.RobotGoal;
 import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
 
@@ -18,7 +19,9 @@ public class BeelineNavigator implements RobotNavigator {
   private RobotGoal goal;
   private Queue<RobotWaypoint> waypoints;
   private RobotPilot pilot;
-  public BeelineNavigator(RobotPilot pilot) {
+  private RobotLogger logger;
+  public BeelineNavigator(RobotLogger logger, RobotPilot pilot) {
+    this.logger = logger;
     goal = null;
     waypoints = new ArrayDeque<>();
     this.pilot = pilot;
@@ -41,6 +44,7 @@ public class BeelineNavigator implements RobotNavigator {
   }
 
   private RobotWaypoint getNextWaypoint() {
+    logger.log("Getting next waypoint");
     if (goal == null) {
       throw new IllegalStateException("Goal has not been set.");
     }
