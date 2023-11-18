@@ -63,7 +63,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @TeleOp(name="Sample: Linear Omni", group="Linear OpMode")
-public class BasicOmniOpMode_Linear extends LinearOpMode {
+public class SampleOmniDriveTeleOpMode extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();

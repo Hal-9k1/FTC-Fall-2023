@@ -49,7 +49,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @TeleOp(name="Sample: Linear Tank", group="Linear OpMode")
-public class BasicOpMode_Linear extends LinearOpMode {
+public class SampleTankDriveTeleOpMode extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
