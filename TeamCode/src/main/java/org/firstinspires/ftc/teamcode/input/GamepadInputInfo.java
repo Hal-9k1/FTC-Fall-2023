@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.input;
 
-import android.media.Image;
-
 /* pkg private */ class GamepadInputInfo implements DriveInputInfo, PlaneInputInfo {
   private double axial;
   private double lateral;

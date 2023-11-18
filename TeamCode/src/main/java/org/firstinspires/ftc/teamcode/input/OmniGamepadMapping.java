@@ -11,8 +11,8 @@ public class OmniGamepadMapping {
 
   public void generateInput() {
     inputInfo = new GamepadInputInfo(-gamepad.left_stick_y,
-      gamepad.left_stick_x,
-      gamepad.right_stick_x,
+      -gamepad.left_stick_x,
+      -gamepad.right_stick_x,
       gamepad.right_bumper);
   }
   public GamepadInputInfo getInput() {

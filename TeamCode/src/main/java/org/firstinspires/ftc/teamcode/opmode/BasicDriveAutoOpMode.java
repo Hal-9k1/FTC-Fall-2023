@@ -44,19 +44,23 @@ public class BasicDriveAutoOpMode extends OpMode {
     Matrix4d swivel;
 
     swivel = new Matrix4d();
+    swivel.setIdentity();
     swivel.setTranslation(new Vector3d(0.0, 1.0, 0.0));
     swivelQueue.add(swivel);
 
     swivel = new Matrix4d();
+    swivel.setIdentity();
     swivel.rotZ(Math.PI / 4);
     swivelQueue.add(swivel);
 
     swivel = new Matrix4d();
+    swivel.setIdentity();
     swivel.rotZ(-Math.PI / 4);
     swivel.setTranslation(new Vector3d(0.0, 1.0, 0.0));
     swivelQueue.add(swivel);
 
     swivel = new Matrix4d();
+    swivel.setIdentity();
     swivel.setTranslation(new Vector3d(-2.0, -2.0, 0.0));
     swivelQueue.add(swivel);
 
@@ -72,7 +76,7 @@ public class BasicDriveAutoOpMode extends OpMode {
   }
   @Override
   public void loop() {
-    if (!finished && stageNum < (int)(runtime.milliseconds() / 1000)) {
+    if (!finished && stageNum < (int)(runtime.milliseconds() / 2000)) {
       stageNum++;
       currentSwivel = swivelQueue.poll();
       if (currentSwivel == null) {
