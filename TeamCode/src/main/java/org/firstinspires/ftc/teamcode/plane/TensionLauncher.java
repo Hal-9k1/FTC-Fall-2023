@@ -4,16 +4,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.input.PlaneInputInfo;
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 
 public class TensionLauncher implements PlaneLauncher {
-  private static final String SERVO_NAME = "plane_launcher_servo";
+  private static final String SERVO_NAME = "plane_launch_servo";
+  private RobotLogger logger;
   private final Servo servo;
   private boolean launched;
 
-  public TensionLauncher(HardwareMap hardwareMap) {
+  public TensionLauncher(RobotLogger logger, HardwareMap hardwareMap) {
+    this.logger = logger;
     servo = hardwareMap.get(Servo.class, SERVO_NAME);
     launched = false;
   }
@@ -26,7 +29,8 @@ public class TensionLauncher implements PlaneLauncher {
   public void launch() {
     if (launched) return;
     launched = true;
-    servo.setPosition(0.5);
+    logger.log("Launching");
+    servo.setPosition(-0.5);
   }
   public void tickInput(PlaneInputInfo inputInfo) {
     if (inputInfo.getShouldLaunch()) {
