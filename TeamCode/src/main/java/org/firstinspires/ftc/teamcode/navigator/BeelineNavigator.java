@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.navigator;
 
+import org.firstinspires.ftc.teamcode.MatrixMagic;
 import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.teamcode.path.RobotGoal;
 import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
@@ -34,7 +35,8 @@ public class BeelineNavigator implements RobotNavigator {
     goal.getTransform().get(translation);
     waypoints.add(new RobotWaypoint(new Point2d(translation.x, translation.y),
       new Vector2d(0.0, 0.0),
-      UNRESTRICTED_PASS_LENGTH));
+      UNRESTRICTED_PASS_LENGTH,
+      MatrixMagic.getYaw(goal.getTransform())));
     progressWaypoint(getNextWaypoint());
   }
 
@@ -54,7 +56,7 @@ public class BeelineNavigator implements RobotNavigator {
     Vector2d translation = new Vector2d(waypoint.obstacleNormal);
     translation.scaleAdd(pilot.getRobotBoundingRadius(), waypoint.position);
     Matrix3d rotation = new Matrix3d();
-    rotation.setIdentity();
+    rotation.rotZ(waypoint.yaw);
     return new Matrix4d(rotation, new Vector3d(translation.x, translation.y, 0.0), 1.0);
   }
   @Override

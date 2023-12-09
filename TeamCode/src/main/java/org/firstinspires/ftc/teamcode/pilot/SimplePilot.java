@@ -64,6 +64,7 @@ public class SimplePilot implements RobotPilot {
   public void setDestination(Matrix4d destination) {
     destinationFS.set(destination);
     robotTransformAS.setIdentity();
+    driveSystem.startNewAction();
   }
 
   @Override
@@ -135,7 +136,7 @@ public class SimplePilot implements RobotPilot {
     Vector3d destTranslationRS = new Vector3d();
     destinationRS.get(destTranslationRS);
     double destAngleRS = MatrixMagic.getYaw(destinationRS);
-    if (destTranslationRS.lengthSquared() < DISTANCE_EPSILON || destAngleRS < ANGLE_EPSILON) {
+    if (destTranslationRS.lengthSquared() < DISTANCE_EPSILON && destAngleRS < ANGLE_EPSILON) {
       logger.log("Reached destination");
       driveSystem.halt();
       return true;
@@ -162,5 +163,17 @@ public class SimplePilot implements RobotPilot {
     double robotRotationFS = MatrixMagic.getYaw(robotTransformFS);
     telemetry.addData("Robot position (meters)", robotTranslationFS);
     telemetry.addData("Robot rotation (radians)", robotRotationFS);
+
+    Vector3d destinationTranslationFS = new Vector3d();
+    destinationFS.get(destinationTranslationFS);
+    double destinationRotationFS = MatrixMagic.getYaw(destinationFS);
+    telemetry.addData("Destination translation (field space, meters)", destinationTranslationFS);
+    telemetry.addData("Destination rotation (field space, radians)", destinationRotationFS);
+
+    Vector3d robotTranslationAS = new Vector3d();
+    driveSystem.getActionSpaceTransform().get(robotTranslationAS);
+    double robotRotationAS = MatrixMagic.getYaw(driveSystem.getActionSpaceTransform());
+    telemetry.addData("Robot translation (action space, meters)", robotTranslationAS);
+    telemetry.addData("Robot rotation (action space, radians)", robotRotationAS);
   }
 }

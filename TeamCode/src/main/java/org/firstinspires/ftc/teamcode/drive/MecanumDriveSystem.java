@@ -73,6 +73,8 @@ public class MecanumDriveSystem implements DriveSystem {
     motors.get(LEFT_BACK_NAME).setDirection(DcMotorSimple.Direction.REVERSE);
     motors.get(RIGHT_FRONT_NAME).setDirection(DcMotorSimple.Direction.FORWARD);
     motors.get(RIGHT_BACK_NAME).setDirection(DcMotorSimple.Direction.REVERSE);
+
+    startNewAction();
   }
   @Override
   public void move(Vector2d direction, double speed) {
