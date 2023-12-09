@@ -8,4 +8,5 @@ public interface PlaneLauncher {
   Matrix4d getLaunchTransform();
   void launch();
   void tickInput(PlaneInputInfo inputInfo);
+  void tick();
 }
