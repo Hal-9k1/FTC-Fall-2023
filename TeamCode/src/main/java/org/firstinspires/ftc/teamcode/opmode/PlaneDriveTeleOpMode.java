@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.opmode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
@@ -44,7 +43,7 @@ public class PlaneDriveTeleOpMode extends OpMode {
     mapping.generateInput();
     driveSystem.tickInput(mapping.getInput());
     planeLauncher.tickInput(mapping.getInput());
-    telemetry.addData("servo pos", hardwareMap.get(Servo.class, "plane_launch_servo").getPosition());
+    //telemetry.addData("servo pos", hardwareMap.get(CRServo.class, "plane_launch_servo").);
     telemetry.addData("Status", "Running");
     telemetry.addData("Runtime", runtime.toString());
     logger.addTelemetry();
