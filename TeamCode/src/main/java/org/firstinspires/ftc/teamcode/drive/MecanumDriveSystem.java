@@ -147,15 +147,15 @@ public class MecanumDriveSystem implements DriveSystem {
               / type.getTicksPerRev() * revLength;
     }
     // m0 = l + a - y
-    // m1 = -l - a - y
+    // m1 = -l + a - y
     // m2 = -l + a + y
-    // m3 = l - a + y
+    // m3 = l + a + y
     // l = (m0 + m3) / 2
     // a = (m0 + m2) / 2
     // y = (m2 + m3) / 2
-    double lateral = (offsets[0] + offsets[3]) / 2;
     double axial = (offsets[0] + offsets[2]) / 2;
-    double yaw = (offsets[2] + offsets[3]) / 2;
+    double lateral = (offsets[0] + offsets[3]) / 2 - axial;
+    double yaw = (offsets[2] + offsets[3]) / 2 - axial;
     Matrix3d yawMat = new Matrix3d();
     yawMat.rotZ(yaw / (2.0 * Math.PI * halfWheelspan) );
     return new Matrix4d(yawMat, new Vector3d(lateral, axial, 0.0), 1.0);

@@ -29,6 +29,7 @@ public class PathingOpMode_Iterative extends OpMode {
   private ElapsedTime runtime;
   private Matrix4d cameraTransformRS;
   private TelemetryLogger logger;
+  private boolean stopped = false;
 
   @Override
   public void init() {
@@ -38,7 +39,7 @@ public class PathingOpMode_Iterative extends OpMode {
     Matrix4d initialRobotTransform = new Matrix4d();
     initialRobotTransform.setIdentity();
     navigator = new SimpleNavigator(initialRobotTransform,
-      AprilTagGameDatabase.getCenterStageTagLibrary());
+      AprilTagGameDatabase.getCenterStageTagLibrary(), logger);
     pathPlanner = new BlindPathPlanner(driveSystem, navigator, logger);
 
     telemetry.addData("Status", "Initialized");
@@ -49,27 +50,42 @@ public class PathingOpMode_Iterative extends OpMode {
   public void start() {
     runtime = new ElapsedTime();
     motorState = pathPlanner.getNextAction();
+    driveSystem.init(motorState);
     cameraTransformRS = new Matrix4d();
     cameraTransformRS.setIdentity();
   }
   @Override
   public void loop() {
-    if (motorState != null && driveSystem.tick(motorState)) {
-      motorState = pathPlanner.getNextAction();
-      driveSystem.init(motorState);
+    if (stopped) {
+      return;
     }
-    if (motorState == null) {
-      telemetry.addData("Status", "Finished");
+    try {
+      if (motorState != null && driveSystem.tick(motorState)) {
+        navigator.updateWithOffset(motorState.getGoalTransform());
+        motorState = pathPlanner.getNextAction();
+        if (motorState != null) {
+          driveSystem.init(motorState);
+        }
+      }
+      if (motorState == null) {
+        telemetry.addData("Status", "Finished");
+        driveSystem.halt();
+      } else {
+        navigator.updateWithTags(cameraTransformRS, new ArrayList<>()); // TODO: detect tags
+        navigator.updateWithOffset(driveSystem.getUnexpectedOffset(motorState));
+        navigator.adjustActions(motorState);
+        driveSystem.tick(motorState);
+        telemetry.addData("Status", "Running");
+        telemetry.addData("Runtime", runtime.toString());
+      }
+      logger.addTelemetry();
+      telemetry.update();
+    } catch (Exception e) {
+      logger.log(e.getLocalizedMessage());
+      logger.addTelemetry();
+      telemetry.update();
       driveSystem.halt();
-    } else {
-      navigator.updateWithTags(cameraTransformRS, new ArrayList<>()); // TODO: detect tags
-      navigator.updateWithOffset(driveSystem.getUnexpectedOffset(motorState));
-      navigator.adjustActions(motorState);
-      driveSystem.tick(motorState);
-      telemetry.addData("Status", "Running");
-      telemetry.addData("Runtime", runtime.toString());
+      stopped = true;
     }
-    logger.addTelemetry();
-    telemetry.update();
   }
 }

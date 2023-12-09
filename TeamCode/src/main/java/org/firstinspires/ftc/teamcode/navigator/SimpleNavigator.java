@@ -1,27 +1,31 @@
 package org.firstinspires.ftc.teamcode.navigator;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
+import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
+import org.firstinspires.ftc.teamcode.drive.MotorActionState;
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 
-import org.firstinspires.ftc.teamcode.drive.MotorActionState;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
 
 public class SimpleNavigator implements RobotNavigator {
   private Matrix4d robotTransform;
+  private RobotLogger logger;
   private Map<Integer, Matrix4d> tagTransformsWorldSpace;
 
-  public SimpleNavigator(Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
+  public SimpleNavigator(Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary, RobotLogger logger) {
     robotTransform = new Matrix4d(initialRobotTransform);
+    this.logger = logger;
     tagTransformsWorldSpace = new HashMap<Integer, Matrix4d>();
     for (AprilTagMetadata tagData : tagLibrary.getAllTags()) {
       Vector3d tagPosition = new Vector3d(
@@ -106,6 +110,7 @@ public class SimpleNavigator implements RobotNavigator {
     // worldSpaceTransform = robotTransform * robotSpaceTransform
     // robotTransform^-1 * worldSpaceTransform = robotSpaceTransform
     Matrix4d result = new Matrix4d();
+    logger.log("Converting to robot space. Robot transform: " + robotTransform.toString());
     result.invert(robotTransform);
     result.mul(worldSpaceTransform);
     return result;
