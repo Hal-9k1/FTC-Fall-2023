@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 
 @TeleOp(name="Motor Test Linear OpMode", group="Linear OpMode")
 public class TestMotorOpMode_Linear extends LinearOpMode {
@@ -32,6 +33,7 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
     encoderReadings = new int[ENCODER_READING_COUNT];
     for (int i = 0; i < motorNames.size(); ++i) {
       motors.add(hardwareMap.get(DcMotor.class, motorNames.get(i)));
+      motors.get(i).setDirection(DcMotorSimple.Direction.FORWARD);
     }
     updateCurrentMotor();
     waitForStart();
