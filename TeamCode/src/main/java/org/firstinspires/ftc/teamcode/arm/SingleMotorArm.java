@@ -25,6 +25,9 @@ public class SingleMotorArm implements RobotArm {
 
     @Override
     public void raise() {
+        if (returning) {
+            return;
+        }
         startPos = motor.getCurrentPosition();
         goalPos = zeroPos + (int)(RAISE_ANGLE / Math.PI * motor.getMotorType().getTicksPerRev());
         stopped = false;
@@ -32,6 +35,9 @@ public class SingleMotorArm implements RobotArm {
 
     @Override
     public void reset() {
+        if (returning) {
+            return;
+        }
         startPos = motor.getCurrentPosition();
         goalPos = zeroPos;
         returning = true;
