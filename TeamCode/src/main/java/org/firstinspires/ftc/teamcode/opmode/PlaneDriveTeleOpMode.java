@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
-import org.firstinspires.ftc.teamcode.input.DefaultGamepadMapping;
+import org.firstinspires.ftc.teamcode.input.OmniGamepadMapping;
 import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.plane.PlaneLauncher;
 import org.firstinspires.ftc.teamcode.plane.TensionLauncher;
@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.plane.TensionLauncher;
 public class PlaneDriveTeleOpMode extends OpMode {
   private DriveSystem driveSystem;
   private PlaneLauncher planeLauncher;
-  private DefaultGamepadMapping mapping;
+  private OmniGamepadMapping mapping;
   private ElapsedTime runtime;
   private TelemetryLogger logger;
 
@@ -25,9 +25,9 @@ public class PlaneDriveTeleOpMode extends OpMode {
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
-    driveSystem = new MecanumDriveSystem(logger, hardwareMap);
+    driveSystem = new MecanumDriveSystem(hardwareMap);
     planeLauncher = new TensionLauncher(logger, hardwareMap);
-    mapping = new DefaultGamepadMapping(gamepad1);
+    mapping = new OmniGamepadMapping(gamepad1);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();

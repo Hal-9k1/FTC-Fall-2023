@@ -5,31 +5,70 @@ import org.firstinspires.ftc.teamcode.input.DriveInputInfo;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector2d;
 
+/**
+ * Powers motors to achieve movements in robot space. Specific to a particular configuration of
+ * motors on a robot and the type of wheels used.
+ */
 public interface DriveSystem {
   /**
-   * Computes the goal encoders for a 2D move action without turning.
-   * @param direction The direction and magnitude to move. The units of the vector should be meters.
-   *                  Positive values for x and y move left and forward respectively.
+   * Queues motor speeds for a 2D move action without turning.
+   * @param direction A normalized vector describing the direction to move. The units of the vector
+   *                  should be meters. Positive values for x and y move left and forward
+   *                  respectively.
    * @param speed The fraction of the maximum speed to move. The ratios between motor speeds will be
    *              preserved.
-   * @return A MotorActionState initialized to describe the move action.
    */
-  MotorActionState computeMove(Vector2d direction, double speed);
+  void move(Vector2d direction, double speed);
 
   /**
-   * Computes the goal encoders for a turn about the robot's center.
+   * Queues motor speeds for a turn about the robot's center.
    * @param angle The angle in radians to turn counterclockwise.
    * @param speed The fraction of the maximum speed to move. The ratios between motor speeds will be
    *              preserved.
-   * @return A MotorActionState initialized to describe the turn action.
    */
-  MotorActionState computeTurn(double angle, double speed);
-  MotorActionState computeLinearSwivel(Vector2d direction, double angle, double speed);
-  MotorActionState computeLinearSwivel(Matrix4d transform, double speed);
+  void turn(double angle, double speed);
+
+  /**
+   * Queues motor speeds for a combined turn and movement, specified by a transformation matrix.
+   * @param transform The transformation matrix describing the motion.
+   * @param speed The fraction of the maximum speed to move. The ratios between motor speeds will be
+   *              preserved.
+   */
+  void swivel(Matrix4d transform, double speed);
+
+  /**
+   * Immediately brakes all motors. A call to {@code exec()} is not needed.
+   */
   void halt();
-  void init(MotorActionState motorState);
-  boolean tick(MotorActionState motorState);
+
+  /**
+   * Pushes the normalized sum of all queued motor speeds to the motors.
+   */
+  void exec();
+
+  /**
+   * Sets motor powers as required by the given input info.
+   * @param input The input info that dictates the powers given to the motors.
+   */
   void tickInput(DriveInputInfo input);
-  Matrix4d getUnexpectedOffset(MotorActionState motorState);
-  double getFootprintRadius();
+
+  /**
+   * Marks the robot's current transform as the base for a new action. Subsequent calls to {@link
+   * DriveSystem#getActionSpaceTransform()} will return transformations relative to this.
+   */
+  void startNewAction();
+
+  /**
+   * Gets the current transform of the robot relative to its transform at the beginning of the
+   * current action (when {@link DriveSystem#startNewAction()} was last called).
+   * @return The current transform of the robot in "action space" (relative to the robot's transform
+   *         at the last call to {@code startNewAction()}).
+   */
+  Matrix4d getActionSpaceTransform();
+
+  /**
+   * Gets the radius of the bounding sphere that should represent the robot when pathfinding.
+   * @return The radius in meters of the robot's bounding sphere.
+   */
+  double getRobotBoundingRadius();
 }
