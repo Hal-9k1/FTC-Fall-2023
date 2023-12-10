@@ -56,11 +56,14 @@ public class SingleMotorArm implements RobotArm {
         int delta = goalPos - motor.getCurrentPosition();
         if ((goalPos - startPos) * delta > 0) {
             motor.setPower(getMotorPower(delta));
-        } else if (!returning) {
-            reset();
         } else {
-            returning = false;
-            stopped = true;
+            motor.setPower(0.0);
+            if (!returning) {
+                reset();
+            } else {
+                returning = false;
+                stopped = true;
+            }
         }
     }
 
