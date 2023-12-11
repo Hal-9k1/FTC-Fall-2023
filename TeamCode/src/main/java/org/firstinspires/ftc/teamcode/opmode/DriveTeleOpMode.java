@@ -12,9 +12,7 @@ import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.input.OmniGamepadMapping;
 
 /**
- * Feeds input info from an input mapping to the drive system and other robot components.
- * Likely the only TeleOpMode we'll ever need unless drivers frequently request different input
- * mappings.
+ * Feeds input info from an input mapping to the drive system.
  */
 @TeleOp(name="Drive", group="Iterative OpMode")
 public class DriveTeleOpMode extends OpMode {

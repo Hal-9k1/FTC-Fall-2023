@@ -27,6 +27,11 @@ import java.util.List;
 
 import javax.vecmath.Matrix4d;
 
+/**
+ * Uses a pilot, BeelineNavigator, and a BlindPathPlanner to blindly execute preset goals.
+ * The planner does not react to game state, but the pilot can use the webcam mounted on the robot
+ * to make better guesses about its current location and make course adjustments.
+ */
 @Autonomous
 public class SightedPathingAutoOpMode extends OpMode {
     private static final Matrix4d RED_ALLIANCE_ORIGIN;

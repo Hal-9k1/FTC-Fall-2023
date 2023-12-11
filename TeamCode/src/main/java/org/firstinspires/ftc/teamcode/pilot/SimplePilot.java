@@ -20,6 +20,10 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
+/**
+ * Localizes the robot using known AprilTags and offset transformations and nudges the robot to be
+ * within epsilons of the current goal.
+ */
 public class SimplePilot implements RobotPilot {
   private static final double DISTANCE_EPSILON = 0.1;
   private static final double ANGLE_EPSILON = 0.1;

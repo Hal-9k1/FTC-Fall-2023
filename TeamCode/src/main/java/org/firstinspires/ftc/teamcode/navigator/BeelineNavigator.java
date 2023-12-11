@@ -14,6 +14,9 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+/**
+ * Makes a beeline for any set {@link RobotGoal}s without any pathfinding whatsoever.
+ */
 public class BeelineNavigator implements RobotNavigator {
   // don't worry about it, we'll fit:
   private static final double UNRESTRICTED_PASS_LENGTH = 10000000000.0;

@@ -10,6 +10,11 @@ import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 
+/**
+ * Launches a plane using a rubber band under tension.
+ * <p>
+ * When the launcher is signaled, a servo releases the rubber band, propelling the plane.
+ */
 public class TensionLauncher implements PlaneLauncher {
   private static final String SERVO_NAME = "plane_launch_servo";
   private static final double RESET_TIME_MS = 4000.0;

@@ -14,6 +14,7 @@ import javax.vecmath.Vector2d;
 
 /**
  * Just moves to the left.
+ * <p>
  * That's it. No navigator or pilot, or anything remotely interesting whatsoever.
  */
 @Autonomous(name="Just Left Auto", group="Iterative OpMode")
