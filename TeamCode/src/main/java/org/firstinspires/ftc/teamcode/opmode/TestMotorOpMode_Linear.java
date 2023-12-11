@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Allows the identification and testing of each drive motor.
+ */
 @TeleOp(name="Motor Test Linear OpMode", group="Linear OpMode")
 public class TestMotorOpMode_Linear extends LinearOpMode {
   private List<String> motorNames = Arrays.asList(

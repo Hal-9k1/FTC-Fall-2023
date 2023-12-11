@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode.navigator;
 
+import org.firstinspires.ftc.teamcode.path.RobotGoal;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+/**
+ * Represents a sub-destination the robot must navigate to in order to reach a greater-scope
+ * {@link RobotGoal}.
+ */
 /* pkg private */ class RobotWaypoint {
   public final Point2d position;
   public final Vector2d obstacleNormal;

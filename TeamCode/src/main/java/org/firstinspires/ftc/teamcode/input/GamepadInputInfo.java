@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.input;
 
+/**
+ * Input info sufficient to operate a holonomic drive system and a plane launcher.
+ * @see DriveInputInfo
+ * @see PlaneInputInfo
+ */
 /* pkg private */ class GamepadInputInfo implements DriveInputInfo, PlaneInputInfo {
   private double axial;
   private double lateral;

@@ -15,7 +15,8 @@ public interface DriveInputInfo {
    */
   double getDriveLateral();
   /**
-   * @return
+   * Gets the yaw input proportional to the other drive inputs.
+   * @return The yaw input, positive values meaning counterclockwise.
    */
   double getDriveYaw();
 }

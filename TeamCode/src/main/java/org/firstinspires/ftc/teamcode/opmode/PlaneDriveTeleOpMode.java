@@ -13,6 +13,9 @@ import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.plane.PlaneLauncher;
 import org.firstinspires.ftc.teamcode.plane.TensionLauncher;
 
+/**
+ * Feeds input info from an input mapping to the drive and plane launching system.
+ */
 @TeleOp(name="Plane Drive", group="Iterative OpMode")
 public class PlaneDriveTeleOpMode extends OpMode {
   private DriveSystem driveSystem;
