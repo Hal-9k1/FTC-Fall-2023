@@ -16,6 +16,7 @@ public class TensionLauncher implements PlaneLauncher {
   private RobotLogger logger;
   private final CRServo servo;
   private boolean launched;
+  private boolean didReset;
   private ElapsedTime timeSinceLaunch;
 
   public TensionLauncher(RobotLogger logger, HardwareMap hardwareMap) {
@@ -30,12 +31,18 @@ public class TensionLauncher implements PlaneLauncher {
     return transform;
   }
   public void launch() {
-    if (launched) return;
+    if (launched) {
+      return;
+    }
     timeSinceLaunch = new ElapsedTime();
     launched = true;
     servo.setPower(-1.0);
   }
   private void reset() {
+    if (didReset) {
+      return;
+    }
+    didReset = true;
     servo.setPower(0.0);
   }
   public void tickInput(PlaneInputInfo inputInfo) {
