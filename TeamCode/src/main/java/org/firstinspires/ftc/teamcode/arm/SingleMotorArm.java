@@ -26,7 +26,7 @@ public class SingleMotorArm implements RobotArm {
     @Override
     public void raise() {
         startPos = motor.getCurrentPosition();
-        goalPos = zeroPos + (int)(RAISE_ANGLE / Math.PI * motor.getMotorType().getTicksPerRev());
+        goalPos = zeroPos + (int)(RAISE_ANGLE / (2 * Math.PI) * motor.getMotorType().getTicksPerRev());
         stopped = false;
     }
 
@@ -42,7 +42,7 @@ public class SingleMotorArm implements RobotArm {
     public void tickInput(ArmInputInfo input) {
         if (input.getShouldArmCancel()) {
             reset();
-        } else if (input.getShouldArmActivate()) {
+        } else if (input.getShouldArmActivate() && stopped) {
             raise();
         }
         tick();
