@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
+import android.util.Size;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
@@ -49,7 +52,9 @@ public class SightedPathingAutoOpMode extends OpMode {
         driveSystem = new MecanumDriveSystem(hardwareMap);
         Matrix4d initialRobotTransform = new Matrix4d();
         initialRobotTransform.setIdentity();
-        pilot = new SimplePilot(logger, driveSystem, RED_ALLIANCE_ORIGIN, initialRobotTransform
+        Matrix4d ftcOriginTransform = new Matrix4d();
+        ftcOriginTransform.rotZ(Math.PI);
+        pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform
                 AprilTagGameDatabase.getCenterStageTagLibrary());
         navigator = new BeelineNavigator(logger, pilot);
         pathPlanner = new BlindPathPlanner(logger, navigator);
