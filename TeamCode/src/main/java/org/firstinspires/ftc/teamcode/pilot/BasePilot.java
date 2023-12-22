@@ -35,6 +35,8 @@ public abstract class BasePilot implements RobotPilot {
     private final double robotInitialYaw;
     private Matrix4d robotTransformAS;
     private Matrix4d destinationFS;
+    // NOTE: These transforms have the tags facing +x, like the robot. FTC gives us the rotation
+    // matrices... facing +y! For no conceivable reason!
     private final Map<Integer, Matrix4d> tagTransformsWS;
     private final RobotLogger logger;
     private final boolean imuEnabled;
@@ -56,14 +58,19 @@ public abstract class BasePilot implements RobotPilot {
                     DistanceUnit.METER.fromUnit(tagData.distanceUnit, tagData.fieldPosition.get(2))
             );
             MatrixF ftcTagRot = tagData.fieldOrientation.toMatrix();
-            Matrix3d tagRotation = new Matrix3d(
+            Matrix3d tagRotation = new Matrix3d();
+            // hacky way to add a constant to the yaw:
+            tagRotation.rotZ(MatrixMagic.getYaw(new Matrix4d(new Matrix3d(
                     ftcTagRot.get(0, 0), ftcTagRot.get(0, 1), ftcTagRot.get(0, 2),
                     ftcTagRot.get(1, 0), ftcTagRot.get(1, 1), ftcTagRot.get(1, 2),
                     ftcTagRot.get(2, 0), ftcTagRot.get(2, 1), ftcTagRot.get(2, 2)
-            );
-            Matrix4d tagTransform = new Matrix4d(tagRotation, tagPosition, 1.0); // alliance space
-            tagTransform.mul(allianceOriginTransform); // field space
-            tagTransformsWS.put(tagData.id, tagTransform);
+            ), new Vector3d(), 1.0)) + Math.PI / 2);
+            Matrix4d tagTransformAS = new Matrix4d(tagRotation, tagPosition, 1.0); // alliance space
+            //tagTransform.mul(allianceOriginTransform); // field space
+            Matrix4d tagTransformWS = new Matrix4d(allianceOriginTransform);
+            tagTransformWS.mul(tagTransformAS);
+            //tagTransformWS = tagTransformAS;
+            tagTransformsWS.put(tagData.id, tagTransformWS);
         }
         this.imuEnabled = imuEnabled;
     }

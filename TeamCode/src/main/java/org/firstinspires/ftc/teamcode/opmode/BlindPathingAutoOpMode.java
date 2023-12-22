@@ -26,11 +26,6 @@ import javax.vecmath.Matrix4d;
  */
 @Autonomous(name="Blind Pathing Auto", group="Iterative OpMode")
 public class BlindPathingAutoOpMode extends OpMode {
-  private static final Matrix4d RED_ALLIANCE_ORIGIN;
-  static {
-    RED_ALLIANCE_ORIGIN = new Matrix4d();
-    RED_ALLIANCE_ORIGIN.setIdentity();
-  }
   private TelemetryLogger logger;
   private DriveSystem driveSystem;
   private RobotPilot pilot;

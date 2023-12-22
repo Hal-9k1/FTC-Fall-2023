@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.path.PathPlanner;
 import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
 import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
 import org.firstinspires.ftc.teamcode.vision.RobotEye;
-import org.firstinspires.ftc.teamcode.vision.AprilRobotEye;
+import org.firstinspires.ftc.teamcode.vision.SpikeAprilRobotEye;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 
 import javax.vecmath.Matrix4d;
@@ -30,12 +30,9 @@ import javax.vecmath.Matrix4d;
  */
 @Autonomous(name="Sighted Pathing", group="Iterative OpMode")
 public class SightedPathingAutoOpMode extends OpMode {
-    private static final Matrix4d RED_ALLIANCE_ORIGIN;
-    static {
-        RED_ALLIANCE_ORIGIN = new Matrix4d();
-        RED_ALLIANCE_ORIGIN.setIdentity();
-    }
-    private static final String WEBCAM_NAME = "WEBCAM NAME HERE";
+    private static final String WEBCAM_NAME = "Webcam 1";
+    private static final double SPIKE_WIDTH_METERS = 0.08798; // 2sqrt(3) inches to meters
+    private static final double CAMERA_FOV = ; // radians
     private TelemetryLogger logger;
     private DriveSystem driveSystem;
     private RobotPilot pilot;
@@ -54,11 +51,12 @@ public class SightedPathingAutoOpMode extends OpMode {
         initialRobotTransform.setIdentity();
         Matrix4d ftcOriginTransform = new Matrix4d();
         ftcOriginTransform.rotZ(Math.PI);
-        pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform
+        pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
                 AprilTagGameDatabase.getCenterStageTagLibrary());
         navigator = new BeelineNavigator(logger, pilot);
         pathPlanner = new BlindPathPlanner(logger, navigator);
-        eye = new AprilRobotEye(hardwareMap.get(WebcamName.class, WEBCAM_NAME));
+        eye = new SpikeAprilRobotEye(hardwareMap.get(WebcamName.class, WEBCAM_NAME),
+                SPIKE_WIDTH_METERS, CAMERA_FOV);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

@@ -18,6 +18,8 @@ public class TelemetryLogger implements RobotLogger {
   public TelemetryLogger(Telemetry telemetry) {
     this.telemetry = telemetry;
     msgs = new ArrayList<>();
+    wasAutoClear = false;
+    flush = false;
   }
 
   /**
@@ -32,7 +34,7 @@ public class TelemetryLogger implements RobotLogger {
     if (flushMode) {
       wasAutoClear = telemetry.isAutoClear();
       telemetry.setAutoClear(false);
-    } else if (!flushMode) {
+    } else {
       telemetry.setAutoClear(wasAutoClear);
     }
     flush = flushMode;
@@ -49,9 +51,10 @@ public class TelemetryLogger implements RobotLogger {
     }
   }
 
-  public void log(String str) {
-    msgs.add(str);
+  public void log(String msg) {
+    msgs.add(msg);
     if (flush) {
+      telemetry.addLine(msg);
       telemetry.update();
     }
   }

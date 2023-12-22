@@ -5,6 +5,9 @@ import org.firstinspires.ftc.teamcode.input.DriveInputInfo;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector2d;
 
+/**
+ * A DriveSystem that silently does nothing.
+ */
 public class StubDriveSystem implements DriveSystem {
     @Override
     public void move(Vector2d direction, double speed) {}
