@@ -11,6 +11,7 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 
 public class BlindPathPlanner implements PathPlanner {
+  private static final double TILE_WIDTH = 0.61; // meters
   private Queue<RobotGoal> goalQueue;
   private RobotNavigator navigator;
   private RobotLogger logger;
@@ -38,21 +39,24 @@ public class BlindPathPlanner implements PathPlanner {
     Matrix3d rot = new Matrix3d();
     // RELATIVE TO ORIGIN:
 
-    // Robot moves forward 2m.
+    // Robot moves forward 4 tiles.
     rot.rotZ(0.0);
-    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 2.0, 0.0), 1.0)));
+    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(TILE_WIDTH * 4, 0.0, 0.0), 1.0)));
 
     // Robot turns counterclockwise a quarter turn.
     rot.rotZ(Math.PI / 2);
-    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 2.0, 0.0), 1.0)));
+    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(TILE_WIDTH * 4, 0.0, 0.0), 1.0)));
 
-    // Robot moves right 4m.
-    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(-4.0, 2.0, 0.0), 1.0)));
+    // Robot moves right 2 tiles.
+    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(TILE_WIDTH * 4, TILE_WIDTH * -2, 0.0), 1.0)));
 
-    //goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 1.0, 0.0), 1.0)));
+    // Robot moves left 1 tile and back 3 tiles.
+    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(TILE_WIDTH * 1, TILE_WIDTH * -1, 0.0), 1.0)));
 
-    //rot.rotZ(0.0);
-    //goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 0.0, 0.0), 1.0)));
+    // Robot turns clockwise a quarter turn, moves left 1 tile, and back 1 tile. Robot should now be
+    // at original position and location.
+    rot.rotZ(0.0);
+    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 0.0, 0.0), 1.0)));
   }
   @Override
   public boolean tick() {

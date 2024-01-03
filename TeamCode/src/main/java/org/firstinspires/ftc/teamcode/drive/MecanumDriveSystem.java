@@ -23,6 +23,7 @@ public class MecanumDriveSystem implements DriveSystem {
   private static final String LEFT_BACK_NAME = "left_back_drive";
   private static final String RIGHT_FRONT_NAME = "right_front_drive";
   private static final String RIGHT_BACK_NAME = "right_back_drive";
+  private static final double INITIAL_CALIBRATION_CONSTANT = -0.23;
   private static final String[] MOTOR_NAMES = {
     LEFT_FRONT_NAME,
     LEFT_BACK_NAME,
@@ -35,6 +36,7 @@ public class MecanumDriveSystem implements DriveSystem {
   private static final Map<String, Double> GEARBOX_RATIOS = new HashMap<>();
   private static final Map<String, Double> WHEEL_RADII_METERS = new HashMap<>();
   private static final Map<String, Double> REV_LENGTHS = new HashMap<>();
+  private static final Map<String, Double> CALIBRATION = new HashMap<>();
   static {
     // input shaft rotation / output shaft rotation
     GEARBOX_RATIOS.put(LEFT_FRONT_NAME, 1.0);
@@ -50,20 +52,30 @@ public class MecanumDriveSystem implements DriveSystem {
     for (String name : MOTOR_NAMES) {
       REV_LENGTHS.put(name, 2.0 * Math.PI * WHEEL_RADII_METERS.get(name));
     }
+
+    // how much the calibration constant affects the motion of each motor
+    CALIBRATION.put(LEFT_FRONT_NAME, 0.0);
+    CALIBRATION.put(LEFT_BACK_NAME, 1.0);
+    CALIBRATION.put(RIGHT_FRONT_NAME, 0.0);
+    CALIBRATION.put(RIGHT_BACK_NAME, 1.0);
   }
 
   private final Map<String, DcMotor> motors;
   private final Map<String, Double> ticksPerRev;
   private final Map<String, Double> actionInitEncs;
   private final Map<String, Double> pendingMotorPowers;
+  private double calibrationConstant;
 
   public MecanumDriveSystem(HardwareMap hardwareMap) {
     motors = new HashMap<>();
     ticksPerRev = new HashMap<>();
     actionInitEncs = new HashMap<>();
     pendingMotorPowers = new HashMap<>();
+    calibrationConstant = INITIAL_CALIBRATION_CONSTANT;
     for (String name : MOTOR_NAMES) {
       DcMotor motor = hardwareMap.get(DcMotor.class, name);
+      motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+      motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
       motors.put(name, motor);
       ticksPerRev.put(name, motor.getMotorType().getTicksPerRev() * GEARBOX_RATIOS.get(name));
       actionInitEncs.put(name, 0.0);
@@ -77,21 +89,21 @@ public class MecanumDriveSystem implements DriveSystem {
     startNewAction();
   }
   @Override
-  public void move(Vector2d direction, double speed) {
-    addToPendingPowers(calculateMotorPowers(direction.y * speed, direction.x * speed, 0));
+  public void move(Vector2d direction, double weight) {
+    addToPendingPowers(calculateMotorPowers(direction.y * weight, direction.x * weight, 0));
   }
   @Override
-  public void turn(double angle, double speed) {
-    addToPendingPowers(calculateMotorPowers(0, 0, HALF_WHEEL_SPAN * angle * speed));
+  public void turn(double angle, double weight) {
+    addToPendingPowers(calculateMotorPowers(0, 0, HALF_WHEEL_SPAN * angle * weight));
   }
   @Override
-  public void swivel(Matrix4d transform, double speed) {
+  public void swivel(Matrix4d transform, double weight) {
     double yaw = MatrixMagic.getYaw(transform);
     Vector3d translation = new Vector3d();
     transform.get(translation);
     double turnLength = HALF_WHEEL_SPAN * yaw;
-    addToPendingPowers(calculateMotorPowers(translation.y * speed, translation.x * speed,
-      turnLength * speed));
+    addToPendingPowers(calculateMotorPowers(translation.x * weight, translation.y * weight,
+      turnLength * weight));
   }
   @Override
   public void halt() {
@@ -101,15 +113,17 @@ public class MecanumDriveSystem implements DriveSystem {
   public void tickInput(DriveInputInfo input) {
     Map<String, Double> powers = calculateMotorPowers(input.getDriveAxial(),
       input.getDriveLateral(), input.getDriveYaw());
+    powers.replaceAll((k, v) -> v * (1.0 + calibrationConstant * CALIBRATION.get(k)));
     normalizePowers(powers);
     motors.forEach((k, v) -> v.setPower(powers.get(k)));
   }
 
   @Override
-  public void exec() {
+  public void exec(double speed) {
+    pendingMotorPowers.replaceAll((k, v) -> v * (1.0 + calibrationConstant * CALIBRATION.get(k)));
     normalizePowers(pendingMotorPowers);
     motors.forEach((k, v) -> {
-      v.setPower(pendingMotorPowers.get(k));
+      v.setPower(pendingMotorPowers.get(k) * speed);
       pendingMotorPowers.put(k, 0.0);
     });
   }
@@ -143,8 +157,8 @@ public class MecanumDriveSystem implements DriveSystem {
     //double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 2;
     //double yaw = (dists.get(RIGHT_BACK_NAME) - dists.get(LEFT_FRONT_NAME)) / 2;
     Matrix3d yawMat = new Matrix3d();
-    yawMat.rotZ(yaw / (2.0 * Math.PI * HALF_WHEEL_SPAN));
-    return new Matrix4d(yawMat, new Vector3d(lateral, axial, 0.0), 1.0);
+    yawMat.rotZ(yaw / HALF_WHEEL_SPAN);
+    return new Matrix4d(yawMat, new Vector3d(axial, lateral, 0.0), 1.0);
   }
   @Override
   public double getRobotBoundingRadius() {
@@ -152,8 +166,19 @@ public class MecanumDriveSystem implements DriveSystem {
   }
 
   /**
-   * @param axial The distance in meters in the axial (front-back) direction.
-   * @param lateral The distance in meters in the lateral (left-right) direction.
+   * Adjusts the implementation-defined calibration constant. Calling code has no way to evaluate
+   * the fitness of the current value; a human observer is needed. Firmly not for production code.
+   * @param delta The delta to change the constant by.
+   */
+  public void adjustCalibrationConstant(double delta) {
+    calibrationConstant += delta;
+  }
+
+  /**
+   * @param axial The distance in meters in the axial (front-back) direction. Positive values move
+   *              the robot forward.
+   * @param lateral The distance in meters in the lateral (left-right) direction. Positive values
+   *                move the robot left.
    * @param yaw The number of revolutions to turn counterclockwise.
    */
   private Map<String, Double> calculateMotorPowers(double axial, double lateral, double yaw) {

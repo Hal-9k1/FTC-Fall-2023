@@ -90,7 +90,7 @@ public class BasicDriveAutoOpMode extends OpMode {
       telemetry.addData("Status", "Finished");
     } else {
       driveSystem.swivel(currentSwivel, 1.0);
-      driveSystem.exec();
+      driveSystem.exec(1.0);
       telemetry.addData("Status", "Running");
       telemetry.addData("Stage", stageNum);
       telemetry.addData("Current swivel yaw", MatrixMagic.getYaw(currentSwivel));

@@ -26,6 +26,8 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
   private DcMotor currentMotor = null;
   private int currentMotorIdx = 0;
   private boolean didChangeMotor = false;
+  private boolean didChangeMode = false;
+  private boolean encoderTestMode = false;
   private boolean didResetEncReads = false;
   private static final float EPSILON = 0.001f;
   @Override
@@ -46,22 +48,37 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
         resetEncoderReadings();
       }
       didChangeMotor = shouldChangeMotor;
-      int encoderReading = currentMotor.getCurrentPosition();
-      if (!didResetEncReads) {
-        encoderReadings[encoderReadingIdx] = encoderReading - lastEncoderReading;
-        encoderReadingIdx = (encoderReadingIdx + 1) % ENCODER_READING_COUNT;
-        if (recordedEncoderReadings < ENCODER_READING_COUNT) {
-          ++recordedEncoderReadings;
-        }
+      boolean shouldChangeMode = Math.abs(gamepad1.left_trigger) > EPSILON; // why is it a float
+      if (shouldChangeMode && !didChangeMode) {
+        encoderTestMode = !encoderTestMode;
+        currentMotor.setPower(0.0f);
+        resetEncoderReadings();
       }
-      lastEncoderReading = encoderReading;
-      didResetEncReads = false;
-      currentMotor.setPower(Math.abs(gamepad1.right_stick_y) > EPSILON ? 1.0f : 0.0f);
+      didChangeMode = shouldChangeMode;
 
-      telemetry.addData("cmidx", "Current motor index: %d",  currentMotorIdx);
+      telemetry.addData("cmidx", "Current motor index: %d", currentMotorIdx);
       telemetry.addData("Current motor name", motorNames.get(currentMotorIdx));
-      telemetry.addData("Current motor speed", "%4.2f ticks/sec", computeMotorSpeed());
-      telemetry.addData("Sampled encoder readings", "%d", recordedEncoderReadings);
+      telemetry.addData("Zero power behavior", motors.get(currentMotorIdx).getZeroPowerBehavior());
+      telemetry.addData("Run mode", motors.get(currentMotorIdx).getMode());
+      if (encoderTestMode) {
+        currentMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        telemetry.addData("Current motor encoder", currentMotor.getCurrentPosition());
+      } else {
+        int encoderReading = currentMotor.getCurrentPosition();
+        if (!didResetEncReads) {
+          encoderReadings[encoderReadingIdx] = encoderReading - lastEncoderReading;
+          encoderReadingIdx = (encoderReadingIdx + 1) % ENCODER_READING_COUNT;
+          if (recordedEncoderReadings < ENCODER_READING_COUNT) {
+            ++recordedEncoderReadings;
+          }
+        }
+        lastEncoderReading = encoderReading;
+        didResetEncReads = false;
+        currentMotor.setPower(Math.abs(gamepad1.right_stick_y) > EPSILON ? 1.0f : 0.0f);
+
+        telemetry.addData("Current motor speed", "%4.2f ticks/sec", computeMotorSpeed());
+        telemetry.addData("Sampled encoder readings", "%d", recordedEncoderReadings);
+      }
       telemetry.update();
     }
   }
