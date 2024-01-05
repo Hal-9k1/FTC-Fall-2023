@@ -13,19 +13,20 @@ import java.util.List;
  * Allows the identification and testing of each drive motor.
  */
 @TeleOp(name="Motor Test Linear OpMode", group="Linear OpMode")
-public class TestMotorOpMode_Linear extends LinearOpMode {
+public class TestMotorTeleOpMode extends LinearOpMode {
   private List<String> motorNames = Arrays.asList(
     "left_front_drive",
     "left_back_drive",
     "right_front_drive",
-    "right_back_drive"
-    );
+    "right_back_drive",
+    "arm_motor"
+  );
   private int[] encoderReadings;
   private int recordedEncoderReadings = 0;
   private int lastEncoderReading = 0;
   private int encoderReadingIdx = 0;
   private static final int ENCODER_READING_COUNT = 10000;
-  private ArrayList<DcMotor> motors = new ArrayList<DcMotor>();
+  private ArrayList<DcMotor> motors = new ArrayList<>();
   private DcMotor currentMotor = null;
   private int currentMotorIdx = 0;
   private boolean didChangeMotor = false;

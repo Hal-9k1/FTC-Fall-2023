@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
  * robot (left turns the robot counterclockwise), and the right bumper signals the plane launcher.
  */
 public class OmniGamepadMapping {
+  private static final float TRIGGER_EPSILON = 0.1f;
   private Gamepad gamepad;
   private GamepadInputInfo inputInfo;
   public OmniGamepadMapping(Gamepad gamepad) {
@@ -23,7 +24,9 @@ public class OmniGamepadMapping {
     inputInfo = new GamepadInputInfo(-gamepad.left_stick_y,
             -gamepad.left_stick_x,
             -gamepad.right_stick_x,
-            gamepad.right_bumper);
+            gamepad.right_bumper,
+            gamepad.left_bumper,
+            Math.abs(gamepad.left_trigger) > TRIGGER_EPSILON);
   }
 
   /**
