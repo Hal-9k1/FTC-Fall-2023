@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pilot;
 
+import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -25,6 +27,7 @@ public class SimplePilot implements RobotPilot {
   private static final double ANGLE_EPSILON = 0.1;
   private final DriveSystem driveSystem;
   private Matrix4d robotTransformFS;
+  private final double robotInitialYaw;
   private Matrix4d robotTransformAS;
   private Matrix4d destinationFS;
   private Map<Integer, Matrix4d> tagTransformsWS;
@@ -35,6 +38,7 @@ public class SimplePilot implements RobotPilot {
     this.logger = logger;
     this.driveSystem = driveSystem;
     robotTransformFS = new Matrix4d(initialRobotTransform);
+    robotInitialYaw = MatrixMagic.getYaw(initialRobotTransform);
     robotTransformAS = new Matrix4d();
     destinationFS = new Matrix4d();
     tagTransformsWS = new HashMap<Integer, Matrix4d>();
@@ -125,6 +129,14 @@ public class SimplePilot implements RobotPilot {
   @Override
   public void updateWithOffset(Matrix4d offset) {
     robotTransformFS.mul(offset);
+  }
+  @Override
+  public void updateWithIMU(IMU imu) {
+    double imuYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    double currentYaw = MatrixMagic.getYaw(robotTransformFS);
+    Matrix3d newRotMatrix = new Matrix3d();
+    newRotMatrix.rotZ(robotInitialYaw + imuYaw); // TODO: incorporate currentYaw
+    robotTransformFS.setRotation(newRotMatrix);
   }
   @Override
   public boolean tick() {

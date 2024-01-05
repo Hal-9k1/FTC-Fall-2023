@@ -36,19 +36,23 @@ public class BlindPathPlanner implements PathPlanner {
 
   private static void populateGoalQueue(Queue<RobotGoal> goalQueue) {
     Matrix3d rot = new Matrix3d();
+    // RELATIVE TO ORIGIN:
 
+    // Robot moves forward 2m.
     rot.rotZ(0.0);
     goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 2.0, 0.0), 1.0)));
 
+    // Robot turns counterclockwise a quarter turn.
     rot.rotZ(Math.PI / 2);
     goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 2.0, 0.0), 1.0)));
 
+    // Robot moves right 4m.
     goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(-4.0, 2.0, 0.0), 1.0)));
 
-    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 1.0, 0.0), 1.0)));
+    //goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 1.0, 0.0), 1.0)));
 
-    rot.rotZ(0.0);
-    goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 0.0, 0.0), 1.0)));
+    //rot.rotZ(0.0);
+    //goalQueue.add(new RobotGoal(new Matrix4d(rot, new Vector3d(0.0, 0.0, 0.0), 1.0)));
   }
   @Override
   public boolean tick() {

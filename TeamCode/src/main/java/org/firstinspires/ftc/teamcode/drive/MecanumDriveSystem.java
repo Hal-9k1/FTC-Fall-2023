@@ -133,9 +133,15 @@ public class MecanumDriveSystem implements DriveSystem {
     // a = (lf + rf) / 2
     // l = (lf - lb) / 2
     // y = (rb - lf) / 2
-    double axial = (dists.get(LEFT_FRONT_NAME) + dists.get(RIGHT_FRONT_NAME)) / 2;
-    double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 2;
-    double yaw = (dists.get(RIGHT_BACK_NAME) - dists.get(LEFT_FRONT_NAME)) / 2;
+
+    double axial = dists.values().stream().mapToDouble(x -> x).sum() / 4;
+    double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)
+      - dists.get(RIGHT_FRONT_NAME) + dists.get(RIGHT_BACK_NAME)) / 4;
+    double yaw = (dists.get(RIGHT_FRONT_NAME) + dists.get(RIGHT_BACK_NAME)
+      - dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 4;
+    //double axial = (dists.get(LEFT_FRONT_NAME) + dists.get(RIGHT_FRONT_NAME)) / 2;
+    //double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 2;
+    //double yaw = (dists.get(RIGHT_BACK_NAME) - dists.get(LEFT_FRONT_NAME)) / 2;
     Matrix3d yawMat = new Matrix3d();
     yawMat.rotZ(yaw / (2.0 * Math.PI * HALF_WHEEL_SPAN));
     return new Matrix4d(yawMat, new Vector3d(lateral, axial, 0.0), 1.0);
