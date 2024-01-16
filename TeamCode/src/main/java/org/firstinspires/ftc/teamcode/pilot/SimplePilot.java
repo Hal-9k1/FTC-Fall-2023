@@ -132,10 +132,7 @@ public class SimplePilot implements RobotPilot {
   }
   @Override
   public boolean tick() {
-    Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
-    updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
-    robotTransformAS = newRobotTransformAS;
-
+    updateWithASOffset();
     Matrix4d destinationRS = convertToRS(destinationFS);
     Vector3d destTranslationRS = new Vector3d();
     destinationRS.get(destTranslationRS);
@@ -149,6 +146,19 @@ public class SimplePilot implements RobotPilot {
       driveSystem.exec();
       return false;
     }
+  }
+  @Override
+  public void tickAdvise() {
+    updateWithASOffset();
+  }
+  @Override
+  public double getFieldSpaceYaw() {
+    return MatrixMagic.getYaw(robotTransformFS);
+  }
+  private void updateWithASOffset() {
+    Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
+    updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
+    robotTransformAS = newRobotTransformAS;
   }
   private Matrix4d convertToRS(Matrix4d transformFS) {
     // transformFS = robotTransform * transformRS
