@@ -51,6 +51,7 @@ public class AdvisedDriveTeleOpMode extends OpMode {
   public void loop() {
     pilot.tickAdvise();
     mapping.generateInput();
+    mapping.getInput().adviseRotation(pilot.getFieldSpaceYaw());
     driveSystem.tickInput(mapping.getInput());
     telemetry.addData("Status", "Running");
     telemetry.addData("Runtime", runtime.toString());
