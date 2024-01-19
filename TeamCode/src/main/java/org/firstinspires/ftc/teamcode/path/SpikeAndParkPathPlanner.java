@@ -70,6 +70,7 @@ public class SpikeAndParkPathPlanner implements PathPlanner {
         goalQueue = new ArrayDeque<>();
         waitingForSpikeTransform = false;
         queueInitialGoals();
+        navigator.setGoal(goalQueue.poll());
     }
     @Override
     public boolean tick() {
@@ -90,6 +91,7 @@ public class SpikeAndParkPathPlanner implements PathPlanner {
                 return true;
               }
             }
+            navigator.setGoal(nextGoal);
         }
         return false;
     }

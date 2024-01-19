@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
-import android.util.Size;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
@@ -32,7 +29,9 @@ import javax.vecmath.Matrix4d;
 public class SightedPathingAutoOpMode extends OpMode {
     private static final String WEBCAM_NAME = "Webcam 1";
     private static final double SPIKE_WIDTH_METERS = 0.08798; // 2sqrt(3) inches to meters
-    private static final double CAMERA_FOV = ; // radians
+    private static final double CAMERA_FOCAL_LENGTH_METERS = 0.033;
+    // from https://stargazerslounge.com/topic/244964-cheap-astrophotography-galileoscope-and-logitech-c270/
+    private static final double CAMERA_WIDTH_METERS = 0.00358;
     private TelemetryLogger logger;
     private DriveSystem driveSystem;
     private RobotPilot pilot;
@@ -56,7 +55,7 @@ public class SightedPathingAutoOpMode extends OpMode {
         navigator = new BeelineNavigator(logger, pilot);
         pathPlanner = new BlindPathPlanner(logger, navigator);
         eye = new SpikeAprilRobotEye(hardwareMap.get(WebcamName.class, WEBCAM_NAME),
-                SPIKE_WIDTH_METERS, CAMERA_FOV);
+                SPIKE_WIDTH_METERS, CAMERA_FOCAL_LENGTH_METERS, CAMERA_WIDTH_METERS);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -78,7 +77,7 @@ public class SightedPathingAutoOpMode extends OpMode {
         }
         pilot.updateWithTags(cameraTransformRS, eye.getTagDetections());
         pilot.addTelemetry(telemetry);
-        logger.addTelemetry();
+        //logger.addTelemetry();
         telemetry.update();
     }
 }

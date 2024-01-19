@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.vision;
 import android.util.Size;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -22,8 +23,13 @@ public class SpikeAprilRobotEye implements RobotEye {
     private TfodProcessor spikeProcessor;
     private VisionPortal visionPortal;
     private double spikeWidthMeters;
-    private double cameraFov;
-    public SpikeAprilRobotEye(CameraName cameraName, double spikeWidthMeters, double cameraFov) {
+    private double cameraFocalLengthMeters;
+    private double cameraWidthMeters;
+
+    public SpikeAprilRobotEye(CameraName cameraName, double spikeWidthMeters,
+                              double cameraFocalLengthMeters, double cameraWidthMeters) {
+        this.cameraFocalLengthMeters = cameraFocalLengthMeters;
+        this.cameraWidthMeters = cameraWidthMeters;
         List<VisionProcessor> processors = new ArrayList<>();
         tagProcessor = buildTagProcessor();
         processors.add(tagProcessor);
@@ -32,7 +38,6 @@ public class SpikeAprilRobotEye implements RobotEye {
         visionPortal = buildVisionPortal(cameraName, processors);
         visionPortal.resumeStreaming();
         this.spikeWidthMeters = spikeWidthMeters;
-        this.cameraFov = cameraFov;
     }
     private static AprilTagProcessor buildTagProcessor() {
         return new AprilTagProcessor.Builder()
@@ -61,16 +66,14 @@ public class SpikeAprilRobotEye implements RobotEye {
     @Override
     public List<Matrix4d> getSpikeDetections() {
         return spikeProcessor.getRecognitions().stream().map(recognition -> {
-          // conversion factor valid only in the plane perpendicular to the camera ray containing
-          // the spike:
-          double distPerPx = spikeWidthMeters / recognition.getWidth();
-          Matrix3d id3 = new Matrix3d();
-          id3.setIdentity();
-          return new Matrix4d(id3, new Vector3d(
-            recognition.getImageWidth() * distPerPx / Math.tan(cameraFov / 2) / 2,
-            (recognition.getImageWidth() - (recognition.getLeft() + recognition.getRight()) / 2)
-              * distPerPx,
-            0), 1.0);
+            // using formula from here:
+            // https://stackoverflow.com/questions/14038002/opencv-how-to-calculate-distance-between-camera-and-object-using-image
+            double d = cameraFocalLengthMeters * spikeWidthMeters * recognition.getImageWidth()
+                    / recognition.getWidth() / cameraWidthMeters;
+            double a = recognition.estimateAngleToObject(AngleUnit.RADIANS);
+            Matrix3d id3 = new Matrix3d();
+            id3.setIdentity();
+            return new Matrix4d(id3, new Vector3d(d * Math.cos(a), d * Math.sin(a), 0.0), 1.0);
         }).collect(Collectors.toList());
     }
     @Override
