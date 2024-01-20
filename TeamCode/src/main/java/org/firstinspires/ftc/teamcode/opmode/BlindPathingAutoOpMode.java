@@ -26,11 +26,6 @@ import javax.vecmath.Matrix4d;
  */
 @Autonomous(name="Blind Pathing Auto", group="Iterative OpMode")
 public class BlindPathingAutoOpMode extends OpMode {
-  private static final Matrix4d RED_ALLIANCE_ORIGIN;
-  static {
-    RED_ALLIANCE_ORIGIN = new Matrix4d();
-    RED_ALLIANCE_ORIGIN.setIdentity();
-  }
   private TelemetryLogger logger;
   private DriveSystem driveSystem;
   private RobotPilot pilot;
@@ -45,7 +40,11 @@ public class BlindPathingAutoOpMode extends OpMode {
     driveSystem = new MecanumDriveSystem(hardwareMap);
     Matrix4d initialRobotTransform = new Matrix4d();
     initialRobotTransform.setIdentity();
-    pilot = new SimplePilot(logger, driveSystem, initialRobotTransform, RED_ALLIANCE_ORIGIN,
+    Matrix4d ftcOriginTransform = new Matrix4d();
+    ftcOriginTransform.rotZ(Math.PI);
+    pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
+            AprilTagGameDatabase.getCenterStageTagLibrary());
+    pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
     navigator = new BeelineNavigator(logger, pilot);
     pathPlanner = new BlindPathPlanner(logger, navigator);

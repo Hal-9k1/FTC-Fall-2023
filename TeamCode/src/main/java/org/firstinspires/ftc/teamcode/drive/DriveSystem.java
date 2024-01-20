@@ -15,26 +15,26 @@ public interface DriveSystem {
    * @param direction A normalized vector describing the direction to move. The units of the vector
    *                  should be meters. Positive values for x and y move left and forward
    *                  respectively.
-   * @param speed The fraction of the maximum speed to move. The ratios between motor speeds will be
+   * @param weight The fraction of the maximum speed to move. The ratios between motor speeds will be
    *              preserved.
    */
-  void move(Vector2d direction, double speed);
+  void move(Vector2d direction, double weight);
 
   /**
    * Queues motor speeds for a turn about the robot's center.
    * @param angle The angle in radians to turn counterclockwise.
-   * @param speed The fraction of the maximum speed to move. The ratios between motor speeds will be
+   * @param weight The fraction of the maximum speed to move. The ratios between motor speeds will be
    *              preserved.
    */
-  void turn(double angle, double speed);
+  void turn(double angle, double weight);
 
   /**
    * Queues motor speeds for a combined turn and movement, specified by a transformation matrix.
    * @param transform The transformation matrix describing the motion.
-   * @param speed The fraction of the maximum speed to move. The ratios between motor speeds will be
+   * @param weight The fraction of the maximum speed to move. The ratios between motor speeds will be
    *              preserved.
    */
-  void swivel(Matrix4d transform, double speed);
+  void swivel(Matrix4d transform, double weight);
 
   /**
    * Immediately brakes all motors. A call to {@code exec()} is not needed.
@@ -44,7 +44,7 @@ public interface DriveSystem {
   /**
    * Pushes the normalized sum of all queued motor speeds to the motors.
    */
-  void exec();
+  void exec(double speed);
 
   /**
    * Sets motor powers as required by the given input info.

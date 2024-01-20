@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pilot;
 
+import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -36,6 +38,8 @@ public interface RobotPilot {
    * @param offset The offset by which the robot's transformation should be updated.
    */
   void updateWithOffset(Matrix4d offset);
+
+  void updateWithIMU(IMU imu);
 
   /**
    * Updates the pilot.
