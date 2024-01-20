@@ -27,7 +27,8 @@ import javax.vecmath.Vector3d;
  * Implements a pilot that moves toward a destination angle and position until it is within an
  * epsilon of each parameter.
  */
-public abstract class BasePilot implements RobotPilot {
+public abstract class
+BasePilot implements RobotPilot {
     private static final double DISTANCE_EPSILON = 0.01; // meters
     private static final double ANGLE_EPSILON = 0.01; // radians
     private final DriveSystem driveSystem;
@@ -124,6 +125,9 @@ public abstract class BasePilot implements RobotPilot {
             sumRotation += robotYawWS;
             knownDetectedTags++;
         }
+        if (knownDetectedTags == 0) {
+          return;
+        }
         double avgRotation = sumRotation / knownDetectedTags;
         Point2d avgPosition = new Point2d();
         avgPosition.scale(1.0 / knownDetectedTags, sumPosition);
@@ -150,10 +154,7 @@ public abstract class BasePilot implements RobotPilot {
     }
     @Override
     public boolean tick() {
-        Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
-        updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
-        robotTransformAS = newRobotTransformAS;
-
+        updateWithASOffset();
         Matrix4d destinationRS = convertToRS(destinationFS);
         Vector3d destTranslationRS = new Vector3d();
         destinationRS.get(destTranslationRS);
@@ -171,7 +172,17 @@ public abstract class BasePilot implements RobotPilot {
     }
     @Override
     public void tickAdvise() {
-        update
+        updateWithASOffset();
+    }
+    @Override
+    public double getFieldSpaceYaw() {
+        return MatrixMagic.getYaw(robotTransformFS);
+    }
+    private void updateWithASOffset() {
+        Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
+        updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
+        robotTransformAS = newRobotTransformAS;
+
     }
     private Matrix4d convertToRS(Matrix4d transformFS) {
         // transformFS = robotTransform * transformRS
@@ -189,22 +200,20 @@ public abstract class BasePilot implements RobotPilot {
         Vector3d robotTranslationFS = new Vector3d();
         robotTransformFS.get(robotTranslationFS);
         double robotRotationFS = MatrixMagic.getYaw(robotTransformFS);
-        StringBuffer robotTranslationFSOutput = new StringBuffer();
-        robotTranslationFSOutput.append(fmt.format(robotTranslationFS.x));
-        robotTranslationFSOutput.append(fmt.format(robotTranslationFS.y));
-        robotTranslationFSOutput.append(fmt.format(robotTranslationFS.z));
-        telemetry.addData("Robot position (FS meters)", robotTranslationFSOutput.toString());
+        String robotTranslationFSOutput = fmt.format(robotTranslationFS.x) +
+                fmt.format(robotTranslationFS.y) +
+                fmt.format(robotTranslationFS.z);
+        telemetry.addData("Robot position (FS meters)", robotTranslationFSOutput);
         telemetry.addData("Robot rotation (FS radians)", fmt.format(robotRotationFS));
 
-        StringBuffer destinationTranslationFSOutput = new StringBuffer();
         Vector3d destinationTranslationFS = new Vector3d();
         destinationFS.get(destinationTranslationFS);
         double destinationRotationFS = MatrixMagic.getYaw(destinationFS);
-        destinationTranslationFSOutput.append(fmt.format(destinationTranslationFS.x));
-        destinationTranslationFSOutput.append(fmt.format(destinationTranslationFS.y));
-        destinationTranslationFSOutput.append(fmt.format(destinationTranslationFS.z));
+        String destinationTranslationFSOutput = fmt.format(destinationTranslationFS.x) +
+                fmt.format(destinationTranslationFS.y) +
+                fmt.format(destinationTranslationFS.z);
         telemetry.addData("Destination translation (FS meters)",
-                destinationTranslationFSOutput.toString());
+                destinationTranslationFSOutput);
         telemetry.addData("Destination rotation (FS radians)",
                 fmt.format(destinationRotationFS));
 
