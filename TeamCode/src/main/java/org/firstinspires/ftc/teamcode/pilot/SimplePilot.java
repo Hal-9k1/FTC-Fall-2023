@@ -40,6 +40,7 @@ public class SimplePilot implements RobotPilot {
     this.driveSystem = driveSystem;
     robotTransformFS = new Matrix4d(initialRobotTransform);
     robotTransformAS = new Matrix4d();
+    robotTransformAS.setIdentity();
     destinationFS = new Matrix4d();
     tagTransformsWS = new HashMap<Integer, Matrix4d>();
     for (AprilTagMetadata tagData : tagLibrary.getAllTags()) {
