@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.opmode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MatrixMagic;
@@ -12,8 +13,8 @@ import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.input.AdvisableDriveInputInfo;
 import org.firstinspires.ftc.teamcode.input.OmniGamepadMapping;
 import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
+import org.firstinspires.ftc.teamcode.pilot.ImuPilot;
 import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
-import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 
 import javax.vecmath.Matrix4d;
@@ -29,17 +30,22 @@ public class AdvisedDriveTeleOpMode extends OpMode {
   private OmniGamepadMapping mapping;
   private ElapsedTime runtime;
   private TelemetryLogger logger;
+  private IMU imu;
+  private boolean useAdvisor;
 
   @Override
   public void init() {
     logger = new TelemetryLogger(telemetry);
     logger.setFlushMode(true);
     driveSystem = new MecanumDriveSystem(hardwareMap);
+    imu = hardwareMap.get(IMU.class, "imu 1");
     Matrix4d ftcOriginTransform = new Matrix4d();
     ftcOriginTransform.rotZ(Math.PI);
     Matrix4d initialRobotTransform = new Matrix4d();
-    
-    pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
+    initialRobotTransform.setIdentity();
+    useAdvisor = true;
+
+    pilot = new ImuPilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
     mapping = new OmniGamepadMapping(gamepad1);
 
@@ -74,14 +80,18 @@ public class AdvisedDriveTeleOpMode extends OpMode {
 
   @Override
   public void loop() {
+    pilot.updateWithIMU(imu);
     pilot.tickAdvise();
     mapping.generateInput();
-    ((AdvisableDriveInputInfo)mapping.getInput()).adviseRotation(pilot.getFieldSpaceYaw());
+    if (useAdvisor) {
+      ((AdvisableDriveInputInfo) mapping.getInput()).adviseRotation(pilot.getFieldSpaceYaw());
+    }
     driveSystem.tickInput(mapping.getInput());
     telemetry.addData("Status", "Running");
     telemetry.addData("Runtime", runtime.toString());
     telemetry.addData("Robot yaw FS", pilot.getFieldSpaceYaw());
     logger.addTelemetry();
+    pilot.addTelemetry(telemetry);
     telemetry.update();
   }
 }

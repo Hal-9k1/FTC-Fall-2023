@@ -47,6 +47,7 @@ BasePilot implements RobotPilot {
         robotTransformFS = new Matrix4d(initialRobotTransform);
         robotInitialYaw = MatrixMagic.getYaw(initialRobotTransform);
         robotTransformAS = new Matrix4d();
+        robotTransformAS.setIdentity(); // in case destination is never set (advise mode)
         destinationFS = new Matrix4d();
         tagTransformsWS = new HashMap<Integer, Matrix4d>();
         for (AprilTagMetadata tagData : tagLibrary.getAllTags()) {
