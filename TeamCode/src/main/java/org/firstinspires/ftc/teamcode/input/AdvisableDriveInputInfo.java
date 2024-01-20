@@ -9,4 +9,9 @@ public interface AdvisableDriveInputInfo extends DriveInputInfo {
    * @param angle The counterclockwise angle in radians to rotate the drive info by.
    */
   void adviseRotation(double angle);
+  /**
+   * Returns whether the control to toggle the advisor has been activated.
+   * @return Whether the control to toggle the advisor has been activated.
+   */
+  boolean getShouldToggleAdvisor();
 }
