@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode;
 
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -33,6 +34,7 @@ public class AdvisedDriveTeleOpMode extends OpMode {
   private IMU imu;
   private static final double ALLIANCE_ANGLE = Math.PI / 2; // in field space radians. positive for blue
   private boolean useAdvisor;
+  private boolean didToggleAdvisor;
 
   @Override
   public void init() {
@@ -40,11 +42,17 @@ public class AdvisedDriveTeleOpMode extends OpMode {
     logger.setFlushMode(true);
     driveSystem = new MecanumDriveSystem(hardwareMap);
     imu = hardwareMap.get(IMU.class, "imu 1");
+    imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
+            RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+            RevHubOrientationOnRobot.UsbFacingDirection.UP)
+    ));
+    imu.resetYaw();
     Matrix4d ftcOriginTransform = new Matrix4d();
     ftcOriginTransform.rotZ(Math.PI);
     Matrix4d initialRobotTransform = new Matrix4d();
     initialRobotTransform.setIdentity();
     useAdvisor = true;
+    didToggleAdvisor = false;
 
     pilot = new ImuPilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
@@ -84,6 +92,11 @@ public class AdvisedDriveTeleOpMode extends OpMode {
     pilot.updateWithIMU(imu, Math.max(0.0, 20000.0 - runtime.milliseconds()) / 20000.0); // TODO: is linear decay best?
     pilot.tickAdvise();
     mapping.generateInput();
+    boolean shouldToggleAdvisor = ((AdvisableDriveInputInfo)mapping.getInput()).getShouldToggleAdvisor();
+    if (shouldToggleAdvisor && !didToggleAdvisor) {
+      useAdvisor = !useAdvisor;
+    }
+    didToggleAdvisor = shouldToggleAdvisor;
     if (useAdvisor) {
       ((AdvisableDriveInputInfo) mapping.getInput()).adviseRotation(
               pilot.getFieldSpaceYaw() + ALLIANCE_ANGLE);

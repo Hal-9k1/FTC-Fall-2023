@@ -13,15 +13,18 @@ import javax.vecmath.Vector3d;
   private double lateral;
   private double yaw;
   private boolean shouldLaunchPlane;
+  private boolean shouldToggleAdvisor;
 
   /* pkg private */ GamepadInputInfo(double axial,
                                      double lateral,
                                      double yaw,
-                                     boolean shouldLaunchPlane) {
+                                     boolean shouldLaunchPlane,
+                                     boolean shouldToggleAdvisor) {
     this.axial = axial;
     this.lateral = lateral;
     this.yaw = yaw;
     this.shouldLaunchPlane = shouldLaunchPlane;
+    this.shouldToggleAdvisor = shouldToggleAdvisor;
   }
 
   @Override
@@ -39,6 +42,10 @@ import javax.vecmath.Vector3d;
   @Override
   public boolean getShouldLaunch() {
     return shouldLaunchPlane;
+  }
+  @Override
+  public boolean getShouldToggleAdvisor() {
+    return shouldToggleAdvisor;
   }
   @Override
   public void adviseRotation(double angle) {
