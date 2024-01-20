@@ -73,7 +73,7 @@ public class ImuBlindPathingAutoOpMode extends OpMode {
             telemetry.addData("Status", "Running");
             telemetry.addData("Runtime", runtime.toString());
         }
-        pilot.updateWithIMU(imu);
+        pilot.updateWithIMU(imu, 1.0);
         pilot.addTelemetry(telemetry);
         logger.addTelemetry();
         telemetry.update();

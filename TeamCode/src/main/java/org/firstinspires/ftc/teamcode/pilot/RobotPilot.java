@@ -39,7 +39,7 @@ public interface RobotPilot {
    */
   void updateWithOffset(Matrix4d offset);
 
-  void updateWithIMU(IMU imu);
+  void updateWithIMU(IMU imu, double weight);
 
   /**
    * Updates the pilot.

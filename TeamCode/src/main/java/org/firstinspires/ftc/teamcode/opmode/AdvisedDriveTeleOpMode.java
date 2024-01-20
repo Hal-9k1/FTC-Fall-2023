@@ -31,6 +31,7 @@ public class AdvisedDriveTeleOpMode extends OpMode {
   private ElapsedTime runtime;
   private TelemetryLogger logger;
   private IMU imu;
+  private static final double ALLIANCE_ANGLE = Math.PI / 2; // in field space radians. positive for blue
   private boolean useAdvisor;
 
   @Override
@@ -80,11 +81,12 @@ public class AdvisedDriveTeleOpMode extends OpMode {
 
   @Override
   public void loop() {
-    pilot.updateWithIMU(imu);
+    pilot.updateWithIMU(imu, Math.max(0.0, 20000.0 - runtime.milliseconds()) / 20000.0); // TODO: is linear decay best?
     pilot.tickAdvise();
     mapping.generateInput();
     if (useAdvisor) {
-      ((AdvisableDriveInputInfo) mapping.getInput()).adviseRotation(pilot.getFieldSpaceYaw());
+      ((AdvisableDriveInputInfo) mapping.getInput()).adviseRotation(
+              pilot.getFieldSpaceYaw() + ALLIANCE_ANGLE);
     }
     driveSystem.tickInput(mapping.getInput());
     telemetry.addData("Status", "Running");

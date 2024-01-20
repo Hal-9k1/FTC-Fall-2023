@@ -143,14 +143,14 @@ BasePilot implements RobotPilot {
         robotTransformFS.mul(offset);
     }
     @Override
-    public void updateWithIMU(IMU imu) {
+    public void updateWithIMU(IMU imu, double weight) {
         if (!imuEnabled) {
             throw new UnsupportedOperationException("IMU not enabled on this pilot.");
         }
         double imuYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double currentYaw = MatrixMagic.getYaw(robotTransformFS);
         Matrix3d newRotMatrix = new Matrix3d();
-        newRotMatrix.rotZ(robotInitialYaw + imuYaw); // TODO: incorporate currentYaw
+        newRotMatrix.rotZ((robotInitialYaw + imuYaw) * weight + currentYaw * (1 - weight));
         robotTransformFS.setRotation(newRotMatrix);
     }
     @Override

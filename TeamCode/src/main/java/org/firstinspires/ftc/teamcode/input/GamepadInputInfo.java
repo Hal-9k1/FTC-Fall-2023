@@ -44,7 +44,7 @@ import javax.vecmath.Vector3d;
   public void adviseRotation(double angle) {
     Vector3d vec = new Vector3d(axial, lateral, 0);
     Matrix3d mat = new Matrix3d();
-    mat.rotZ(angle);
+    mat.rotZ(-angle);
     mat.transform(vec);
     axial = vec.x;
     lateral = vec.y;
