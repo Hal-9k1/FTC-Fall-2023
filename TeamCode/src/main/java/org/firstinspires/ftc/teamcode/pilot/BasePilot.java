@@ -169,6 +169,10 @@ public abstract class BasePilot implements RobotPilot {
             return false;
         }
     }
+    @Override
+    public void tickAdvise() {
+        update
+    }
     private Matrix4d convertToRS(Matrix4d transformFS) {
         // transformFS = robotTransform * transformRS
         // robotTransform^-1 * transformFS = transformRS
