@@ -19,7 +19,7 @@ public class MatrixMagic {
    */
   public static double getYaw(Matrix4d mat) {
     // From this person online: https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-rotation-matrix
-    return Math.atan2(-mat.m10, mat.m00);
+    return -Math.atan2(-mat.m10, mat.m00);
   }
 
   /**
