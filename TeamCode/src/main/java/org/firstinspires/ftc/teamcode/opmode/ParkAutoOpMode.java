@@ -46,11 +46,11 @@ public class ParkAutoOpMode extends OpMode {
     Matrix4d initialRobotTransform = new Matrix4d(initialRobotRotationMat,
       new Vector3d(1.5 * 0.61, -2.5 * 0.61, 0), 1.0);
     Matrix4d ftcOrigin = new Matrix4d();
-    ftcOrigin.rotZ(Math.PI / 2);
-    pilot = new SimplePilot(logger, driveSystem, initialRobotTransform, ftcOrigin,
+    ftcOrigin.rotZ(Math.PI);
+    pilot = new SimplePilot(logger, driveSystem, ftcOrigin, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
     navigator = new BeelineNavigator(logger, pilot);
-    pathPlanner = new ParkPathPlanner(navigator, Alliance.RED, StartingPosition.BACK);
+    pathPlanner = new ParkPathPlanner(navigator, Alliance.BLUE, StartingPosition.FRONT);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();

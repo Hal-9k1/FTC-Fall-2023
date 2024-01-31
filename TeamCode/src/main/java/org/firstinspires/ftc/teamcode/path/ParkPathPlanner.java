@@ -51,6 +51,7 @@ public class ParkPathPlanner implements PathPlanner {
         stopped = false;
         goalQueue = new ArrayDeque<>();
         queueInitialGoals();
+        navigator.setGoal(goalQueue.poll()); // assumes at least one goal in the queue
     }
     @Override
     public boolean tick() {
@@ -63,6 +64,7 @@ public class ParkPathPlanner implements PathPlanner {
                 stopped = true;
                 return true;
             }
+            navigator.setGoal(nextGoal);
         }
         return false;
     }
@@ -77,7 +79,7 @@ public class ParkPathPlanner implements PathPlanner {
         id.setIdentity();
         pushStartSpaceGoal(new Matrix4d(id, new Vector3d(0.61 * 2.5, 0, 0), 1.0));
         Matrix3d turned = new Matrix3d();
-        turned.rotZ(-Math.PI / 2);
+        turned.rotZ(Math.PI / 2);
         pushStartSpaceGoal(new Matrix4d(turned, new Vector3d(0.61 * 2.5, 0, 0), 1.0));
         pushAllianceSpaceGoal(new Matrix4d(turned, new Vector3d(0.61 * 2.5, 0.61 * 2.5, 0), 1.0));
     }
