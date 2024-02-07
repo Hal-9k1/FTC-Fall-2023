@@ -52,6 +52,7 @@ public class TelemetryLogger implements RobotLogger {
   public void log(String str) {
     msgs.add(str);
     if (flush) {
+      telemetry.addLine(str);
       telemetry.update();
     }
   }

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.path;
 
+import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
 
 import java.util.ArrayDeque;
@@ -21,6 +22,7 @@ public class ParkPathPlanner implements PathPlanner {
 
         Matrix3d redOriginRot = new Matrix3d();
         redOriginRot.rotZ(-Math.PI / 2);
+
         RED_ALLIANCE_ORIGIN_FIELD_SPACE = new Matrix4d(redOriginRot, new Vector3d(0, 3 * 0.61, 0), 1.0);
         RED_ALLIANCE_ORIGIN_FIELD_SPACE.mul(new Matrix4d( // flip y for red origin so +y is always backstage
           1.0,  0.0, 0.0, 0.0,
@@ -33,16 +35,19 @@ public class ParkPathPlanner implements PathPlanner {
         blueOriginRot.rotZ(Math.PI / 2);
         BLUE_ALLIANCE_ORIGIN_FIELD_SPACE = new Matrix4d(blueOriginRot, new Vector3d(0, -3 * 0.61, 0), 1.0);
 
-        BACK_START_ORIGIN_ALLIANCE_SPACE = new Matrix4d(id, new Vector3d(0, 1.5 * 0.61, 0), 1.0);
-        FRONT_START_ORIGIN_ALLIANCE_SPACE = new Matrix4d(id, new Vector3d(0, -1.5 * 0.61, 0), 1.0);
+        BACK_START_ORIGIN_ALLIANCE_SPACE = new Matrix4d(id, new Vector3d(0.5 * 0.61, 1.5 * 0.61, 0), 1.0);
+        FRONT_START_ORIGIN_ALLIANCE_SPACE = new Matrix4d(id, new Vector3d(0.5 * 0.61, -1.5 * 0.61, 0), 1.0);
     }
+
+    private RobotLogger logger;
     private final RobotNavigator navigator;
     private final Matrix4d allianceOrigin;
     private final Matrix4d startPositionOrigin;
     private boolean stopped;
     private final ArrayDeque<RobotGoal> goalQueue;
-    public ParkPathPlanner(RobotNavigator navigator, Alliance alliance,
-            StartingPosition startingPosition) {
+    public ParkPathPlanner(RobotLogger logger, RobotNavigator navigator, Alliance alliance,
+                           StartingPosition startingPosition) {
+        this.logger = logger;
         this.navigator = navigator;
         allianceOrigin = alliance == Alliance.RED ? RED_ALLIANCE_ORIGIN_FIELD_SPACE
             : BLUE_ALLIANCE_ORIGIN_FIELD_SPACE;
@@ -52,6 +57,9 @@ public class ParkPathPlanner implements PathPlanner {
         goalQueue = new ArrayDeque<>();
         queueInitialGoals();
         navigator.setGoal(goalQueue.poll()); // assumes at least one goal in the queue
+        //Matrix4d startPosFS = new Matrix4d(allianceOrigin);
+        //startPosFS.mul(startPositionOrigin);
+        //logger.log("Robot start position (field space): " + startPosFS);
     }
     @Override
     public boolean tick() {
@@ -84,13 +92,15 @@ public class ParkPathPlanner implements PathPlanner {
         pushAllianceSpaceGoal(new Matrix4d(turned, new Vector3d(0.61 * 2.5, 0.61 * 2.5, 0), 1.0));
     }
     private void pushAllianceSpaceGoal(Matrix4d allianceSpaceGoalTransform) {
-        Matrix4d fieldSpaceGoalTransform = new Matrix4d(allianceSpaceGoalTransform);
-        fieldSpaceGoalTransform.mul(allianceOrigin);
+        Matrix4d fieldSpaceGoalTransform = new Matrix4d(allianceOrigin);
+        fieldSpaceGoalTransform.mul(allianceSpaceGoalTransform);
+        //logger.log("Pushing field space goal:\n" + fieldSpaceGoalTransform);
         goalQueue.addLast(new RobotGoal(fieldSpaceGoalTransform));
     }
     private void pushStartSpaceGoal(Matrix4d startSpaceGoalTransform) {
-        Matrix4d allianceSpaceGoalTransform = new Matrix4d(startSpaceGoalTransform);
-        allianceSpaceGoalTransform.mul(startPositionOrigin);
+        Matrix4d allianceSpaceGoalTransform = new Matrix4d(startPositionOrigin);
+        allianceSpaceGoalTransform.mul(startSpaceGoalTransform);
+        //logger.log("Start space goal to alliance space goal:\n" + allianceSpaceGoalTransform);
         pushAllianceSpaceGoal(allianceSpaceGoalTransform);
     }
 }

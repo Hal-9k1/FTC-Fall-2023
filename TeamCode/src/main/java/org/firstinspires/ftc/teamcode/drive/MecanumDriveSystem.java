@@ -65,6 +65,7 @@ public class MecanumDriveSystem implements DriveSystem {
     pendingMotorPowers = new HashMap<>();
     for (String name : MOTOR_NAMES) {
       DcMotor motor = hardwareMap.get(DcMotor.class, name);
+      //motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
       motors.put(name, motor);
       ticksPerRev.put(name, motor.getMotorType().getTicksPerRev() * GEARBOX_RATIOS.get(name));
       actionInitEncs.put(name, 0.0);
@@ -79,7 +80,7 @@ public class MecanumDriveSystem implements DriveSystem {
   }
   @Override
   public void move(Vector2d direction, double speed) {
-    addToPendingPowers(calculateMotorPowers(direction.y * speed, direction.x * speed, 0));
+    addToPendingPowers(calculateMotorPowers(direction.x * speed, direction.y * speed, 0));
   }
   @Override
   public void turn(double angle, double speed) {
@@ -91,7 +92,7 @@ public class MecanumDriveSystem implements DriveSystem {
     Vector3d translation = new Vector3d();
     transform.get(translation);
     double turnLength = HALF_WHEEL_SPAN * yaw;
-    addToPendingPowers(calculateMotorPowers(translation.y * speed, translation.x * speed,
+    addToPendingPowers(calculateMotorPowers(translation.x * speed, translation.y * speed,
       turnLength * speed));
   }
   @Override
@@ -134,12 +135,14 @@ public class MecanumDriveSystem implements DriveSystem {
     // a = (lf + rf) / 2
     // l = (lf - lb) / 2
     // y = (rb - lf) / 2
-    double axial = (dists.get(LEFT_FRONT_NAME) + dists.get(RIGHT_FRONT_NAME)) / 2;
-    double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 2;
-    double yaw = (dists.get(RIGHT_BACK_NAME) - dists.get(LEFT_FRONT_NAME)) / 2;
+    double axial = dists.values().stream().mapToDouble(x -> x).sum() / 4;
+    double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)
+      - dists.get(RIGHT_FRONT_NAME) + dists.get(RIGHT_BACK_NAME)) / 4;
+    double yaw = (dists.get(RIGHT_FRONT_NAME) + dists.get(RIGHT_BACK_NAME)
+      - dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 4;
     Matrix3d yawMat = new Matrix3d();
-    yawMat.rotZ(yaw / (2.0 * Math.PI * HALF_WHEEL_SPAN));
-    return new Matrix4d(yawMat, new Vector3d(lateral, axial, 0.0), 1.0);
+    yawMat.rotZ(yaw / HALF_WHEEL_SPAN);
+    return new Matrix4d(yawMat, new Vector3d(axial, lateral, 0.0), 1.0);
   }
   @Override
   public double getRobotBoundingRadius() {

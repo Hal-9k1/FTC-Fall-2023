@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
-import org.firstinspires.ftc.teamcode.logging.NopLogger;
-import org.firstinspires.ftc.teamcode.logging.RobotLogger;
+import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.navigator.BeelineNavigator;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
 import org.firstinspires.ftc.teamcode.path.Alliance;
@@ -31,7 +30,7 @@ import javax.vecmath.Vector3d;
 @Autonomous(name="Far Park Auto", group="Iterative OpMode")
 public class ParkAutoOpMode extends OpMode {
   private ElapsedTime runtime;
-  private RobotLogger logger;
+  private TelemetryLogger logger;
   private DriveSystem driveSystem;
   private RobotPilot pilot;
   private RobotNavigator navigator;
@@ -39,7 +38,8 @@ public class ParkAutoOpMode extends OpMode {
   private Matrix4d cameraTransformRS;
   @Override
   public void init() {
-    logger = new NopLogger();
+    logger = new TelemetryLogger(telemetry);
+    logger.setFlushMode(true);
     driveSystem = new MecanumDriveSystem(hardwareMap);
     Matrix3d initialRobotRotationMat = new Matrix3d();
     initialRobotRotationMat.rotZ(Math.PI / 2);
@@ -50,10 +50,11 @@ public class ParkAutoOpMode extends OpMode {
     pilot = new SimplePilot(logger, driveSystem, ftcOrigin, initialRobotTransform,
       AprilTagGameDatabase.getCenterStageTagLibrary());
     navigator = new BeelineNavigator(logger, pilot);
-    pathPlanner = new ParkPathPlanner(navigator, Alliance.BLUE, StartingPosition.FRONT);
+    pathPlanner = new ParkPathPlanner(logger, navigator, Alliance.BLUE, StartingPosition.FRONT);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();
+    logger.setFlushMode(false);
   }
   @Override
   public void start() {
@@ -70,7 +71,7 @@ public class ParkAutoOpMode extends OpMode {
       telemetry.addData("Runtime", runtime.toString());
     }
     pilot.addTelemetry(telemetry);
-    //logger.addTelemetry();
+    logger.addTelemetry();
     telemetry.update();
   }
 }
