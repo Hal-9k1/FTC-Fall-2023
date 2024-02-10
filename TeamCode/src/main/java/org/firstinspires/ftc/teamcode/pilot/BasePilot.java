@@ -46,6 +46,7 @@ public abstract class BasePilot implements RobotPilot {
         robotTransformFS = new Matrix4d(initialRobotTransform);
         robotInitialYaw = MatrixMagic.getYaw(initialRobotTransform);
         robotTransformAS = new Matrix4d();
+        robotTransformAS.setIdentity();
         destinationFS = new Matrix4d();
         tagTransformsWS = new HashMap<Integer, Matrix4d>();
         for (AprilTagMetadata tagData : tagLibrary.getAllTags()) {
@@ -124,6 +125,10 @@ public abstract class BasePilot implements RobotPilot {
             sumRotation += robotYawWS;
             knownDetectedTags++;
         }
+        // TODO: known bug - should return early if knownDetectedTags == 0
+        // not fixing now in because we're mid-merge and a later change may fix
+        // it. if not then I hope I remember to check TODO comments (look
+        // there's two now)
         double avgRotation = sumRotation / knownDetectedTags;
         Point2d avgPosition = new Point2d();
         avgPosition.scale(1.0 / knownDetectedTags, sumPosition);
@@ -150,10 +155,7 @@ public abstract class BasePilot implements RobotPilot {
     }
     @Override
     public boolean tick() {
-        Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
-        updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
-        robotTransformAS = newRobotTransformAS;
-
+        updateWithASOffset();
         Matrix4d destinationRS = convertToRS(destinationFS);
         Vector3d destTranslationRS = new Vector3d();
         destinationRS.get(destTranslationRS);
@@ -169,6 +171,16 @@ public abstract class BasePilot implements RobotPilot {
             return false;
         }
     }
+    @Override
+    public void tickAdvise() {
+        updateWithASOffset();
+    }
+    private void updateWithASOffset() {
+      Matrix4d newRobotTransformAS = driveSystem.getActionSpaceTransform();
+      updateWithOffset(MatrixMagic.invMul(robotTransformAS, newRobotTransformAS));
+      robotTransformAS = newRobotTransformAS;
+    }
+
     private Matrix4d convertToRS(Matrix4d transformFS) {
         // transformFS = robotTransform * transformRS
         // robotTransform^-1 * transformFS = transformRS

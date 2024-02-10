@@ -57,6 +57,17 @@ public interface RobotPilot {
   boolean tick();
 
   /**
+   * Updates the pilot without sending commands to the DriveSystem.
+   */
+  void tickAdvise();
+
+  /**
+   * Gets the field space yaw of the robot.
+   * @return The robot's field space yaw.
+   */
+  double getFieldSpaceYaw();
+
+  /**
    * Gets the radius of the smallest sphere that would completely enclose the robot.
    * @return The radius of the robot's bounding sphere.
    */

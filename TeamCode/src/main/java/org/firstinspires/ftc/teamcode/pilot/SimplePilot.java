@@ -7,9 +7,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import javax.vecmath.Matrix4d;
 
 public class SimplePilot extends BasePilot {
-  public SimplePilot(RobotLogger logger, DriveSystem driveSystem, Matrix4d allianceOriginTransform,
-                     Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
-    super(logger, driveSystem, allianceOriginTransform, initialRobotTransform, tagLibrary,
-            false);
-  }
+    public SimplePilot(RobotLogger logger, DriveSystem driveSystem, Matrix4d allianceOriginTransform,
+                       Matrix4d initialRobotTransform, AprilTagLibrary tagLibrary) {
+        super(logger, driveSystem, allianceOriginTransform, initialRobotTransform, tagLibrary,
+                false);
+    }
 }
