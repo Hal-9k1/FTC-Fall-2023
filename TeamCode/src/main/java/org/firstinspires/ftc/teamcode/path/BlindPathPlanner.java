@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
 
 import java.util.ArrayDeque;
+import java.util.List;
 import java.util.Queue;
 
 import javax.vecmath.Matrix3d;
@@ -64,5 +65,10 @@ public class BlindPathPlanner implements PathPlanner {
       processNextGoal();
     }
     return false;
+  }
+
+  @Override
+  public boolean acceptSpikeTransforms(List<Matrix4d> transformList) {
+    return true; // please stop sending us these, we're not even using them
   }
 }
