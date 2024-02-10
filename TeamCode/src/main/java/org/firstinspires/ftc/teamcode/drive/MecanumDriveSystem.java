@@ -23,7 +23,7 @@ public class MecanumDriveSystem implements DriveSystem {
   private static final String LEFT_BACK_NAME = "left_back_drive";
   private static final String RIGHT_FRONT_NAME = "right_front_drive";
   private static final String RIGHT_BACK_NAME = "right_back_drive";
-  private static final double INITIAL_CALIBRATION_CONSTANT = 0;//-0.23;
+  private static final double INITIAL_CALIBRATION_CONSTANT = -0.23;
   private static final String[] MOTOR_NAMES = {
     LEFT_FRONT_NAME,
     LEFT_BACK_NAME,

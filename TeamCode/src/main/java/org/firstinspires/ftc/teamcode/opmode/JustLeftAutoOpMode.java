@@ -41,7 +41,7 @@ public class JustLeftAutoOpMode extends OpMode {
     @Override
     public void loop() {
         if (runtime.milliseconds() < 7000) {
-            driveSystem.move(new Vector2d(1.0, 0.0), 0.25);
+            driveSystem.move(new Vector2d(0.0, 1.0), 0.25);
             //driveSystem.turn(1.0, 1.0);
             driveSystem.exec(0.25);
             telemetry.addData("Status", "Running");
