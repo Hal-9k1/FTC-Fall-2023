@@ -239,4 +239,8 @@ public abstract class BasePilot implements RobotPilot {
         telemetry.addData("Robot translation (AS meters)", robotTranslationASOutput.toString());
         telemetry.addData("Robot rotation (AS radians)", fmt.format(robotRotationAS));
     }
+    @Override
+    public double getFieldSpaceYaw() {
+        return MatrixMagic.getYaw(robotTransformFS);
+    }
 }

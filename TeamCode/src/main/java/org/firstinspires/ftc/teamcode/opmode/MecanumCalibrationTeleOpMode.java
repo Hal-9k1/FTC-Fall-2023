@@ -58,7 +58,8 @@ public class MecanumCalibrationTeleOpMode extends OpMode {
         }
         pressed.put("lt", Math.abs(gamepad1.left_trigger) > TRIGGER_EPSILON);
 
-        driveSystem.tickInput(mapping.generateInput());
+        mapping.generateInput();
+        driveSystem.tickInput(mapping.getInput());
 
         telemetry.addData("Status", "running");
         telemetry.addData("Calibration constant", calibrationConstant);

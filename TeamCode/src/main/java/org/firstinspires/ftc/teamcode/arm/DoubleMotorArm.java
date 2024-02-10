@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.logging.RobotLogger;
 
 public class DoubleMotorArm implements RobotArm {
     private static final String ARM_MOTOR_NAME = "arm_motor";
-    private static final String ALT_ARM_MOTOR_NAME = "arm_motor";
+    private static final String ALT_ARM_MOTOR_NAME = "alt_arm_motor";
     private static final double RAISE_ANGLE = 170.0 / 180.0 * Math.PI;
     private final DcMotor motor;
     private final DcMotor altMotor;

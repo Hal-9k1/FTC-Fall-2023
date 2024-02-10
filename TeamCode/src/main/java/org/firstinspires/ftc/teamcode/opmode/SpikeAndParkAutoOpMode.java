@@ -6,16 +6,20 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
-import org.firstinspires.ftc.teamcode.logging.NopLogger;
+import org.firstinspires.ftc.teamcode.logging.TelemetryLogger;
 import org.firstinspires.ftc.teamcode.navigator.BeelineNavigator;
 import org.firstinspires.ftc.teamcode.navigator.RobotNavigator;
+import org.firstinspires.ftc.teamcode.path.Alliance;
 import org.firstinspires.ftc.teamcode.path.PathPlanner;
 import org.firstinspires.ftc.teamcode.path.SpikeAndParkPathPlanner;
+import org.firstinspires.ftc.teamcode.path.StartingPosition;
 import org.firstinspires.ftc.teamcode.pilot.RobotPilot;
 import org.firstinspires.ftc.teamcode.pilot.SimplePilot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Vector3d;
 
 /**
  * Moves to the position of a the randomly placed spike, then parks backstage.
@@ -26,15 +30,14 @@ import javax.vecmath.Matrix4d;
 @Autonomous(name="Spike and Park Auto", group="Iterative OpMode")
 public class SpikeAndParkAutoOpMode extends OpMode {
   private ElapsedTime runtime;
-  private RobotLogger logger;
+  private TelemetryLogger logger;
   private DriveSystem driveSystem;
   private RobotPilot pilot;
   private RobotNavigator navigator;
   private PathPlanner pathPlanner;
-  private ElapsedTime runtime;
   @Override
   public void init() {
-    logger = new NopLogger();
+    logger = new TelemetryLogger(telemetry);
     driveSystem = new MecanumDriveSystem(hardwareMap);
     Matrix3d initialRobotRotationMat = new Matrix3d();
     initialRobotRotationMat.rotZ(Math.PI / 2);
@@ -45,7 +48,7 @@ public class SpikeAndParkAutoOpMode extends OpMode {
     pilot = new SimplePilot(logger, driveSystem, initialRobotTransform, ftcOrigin,
       AprilTagGameDatabase.getCenterStageTagLibrary());
     navigator = new BeelineNavigator(logger, pilot);
-    pathPlanner = new SpikeAndParkPathPlanner(logger, navigator);
+    pathPlanner = new SpikeAndParkPathPlanner(navigator, Alliance.RED, StartingPosition.FRONT);
 
     telemetry.addData("Status", "Initialized");
     telemetry.update();
