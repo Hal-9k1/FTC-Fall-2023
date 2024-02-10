@@ -4,27 +4,34 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 /**
- * Input info sufficient to operate a holonomic drive system and a plane launcher.
+ * Input info sufficient to operate a holonomic drive system, a plane launcher, and an arm.
  * @see DriveInputInfo
  * @see PlaneInputInfo
+ * @see ArmInputInfo
  */
-/* pkg private */ class GamepadInputInfo implements AdvisableDriveInputInfo, PlaneInputInfo {
+/* pkg private */ class GamepadInputInfo implements AdvisableDriveInputInfo, PlaneInputInfo, ArmInputInfo {
   private double axial;
   private double lateral;
   private double yaw;
   private boolean shouldLaunchPlane;
   private boolean shouldToggleAdvisor;
+  private boolean shouldArmActivate;
+  private boolean shouldArmCancel;
 
   /* pkg private */ GamepadInputInfo(double axial,
                                      double lateral,
                                      double yaw,
                                      boolean shouldLaunchPlane,
-                                     boolean shouldToggleAdvisor) {
+                                     boolean shouldToggleAdvisor,
+                                     boolean shouldArmActivate,
+                                     boolean shouldArmCancel) {
     this.axial = axial;
     this.lateral = lateral;
     this.yaw = yaw;
     this.shouldLaunchPlane = shouldLaunchPlane;
     this.shouldToggleAdvisor = shouldToggleAdvisor;
+    this.shouldArmActivate = shouldArmActivate;
+    this.shouldArmCancel = shouldArmCancel;
   }
 
   @Override
@@ -55,5 +62,13 @@ import javax.vecmath.Vector3d;
     mat.transform(vec);
     axial = vec.x;
     lateral = vec.y;
+  }
+  @Override
+  public boolean getShouldArmActivate() {
+    return shouldArmActivate;
+  }
+  @Override
+  public boolean getShouldArmCancel() {
+    return shouldArmCancel;
   }
 }
