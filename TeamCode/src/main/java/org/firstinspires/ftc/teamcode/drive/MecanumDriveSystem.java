@@ -75,8 +75,7 @@ public class MecanumDriveSystem implements DriveSystem {
     calibrationConstant = INITIAL_CALIBRATION_CONSTANT;
     for (String name : MOTOR_NAMES) {
       DcMotor motor = hardwareMap.get(DcMotor.class, name);
-      motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-      motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      //motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
       motors.put(name, motor);
       ticksPerRev.put(name, motor.getMotorType().getTicksPerRev() * GEARBOX_RATIOS.get(name));
       actionInitEncs.put(name, 0.0);
@@ -90,8 +89,8 @@ public class MecanumDriveSystem implements DriveSystem {
     startNewAction();
   }
   @Override
-  public void move(Vector2d direction, double weight) {
-    addToPendingPowers(calculateMotorPowers(direction.y * weight, direction.x * weight, 0));
+  public void move(Vector2d direction, double speed) {
+    addToPendingPowers(calculateMotorPowers(direction.x * speed, direction.y * speed, 0));
   }
   @Override
   public void turn(double angle, double weight) {
@@ -148,15 +147,11 @@ public class MecanumDriveSystem implements DriveSystem {
     // a = (lf + rf) / 2
     // l = (lf - lb) / 2
     // y = (rb - lf) / 2
-
     double axial = dists.values().stream().mapToDouble(x -> x).sum() / 4;
     double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)
       - dists.get(RIGHT_FRONT_NAME) + dists.get(RIGHT_BACK_NAME)) / 4;
     double yaw = (dists.get(RIGHT_FRONT_NAME) + dists.get(RIGHT_BACK_NAME)
       - dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 4;
-    //double axial = (dists.get(LEFT_FRONT_NAME) + dists.get(RIGHT_FRONT_NAME)) / 2;
-    //double lateral = (dists.get(LEFT_FRONT_NAME) - dists.get(LEFT_BACK_NAME)) / 2;
-    //double yaw = (dists.get(RIGHT_BACK_NAME) - dists.get(LEFT_FRONT_NAME)) / 2;
     Matrix3d yawMat = new Matrix3d();
     yawMat.rotZ(yaw / HALF_WHEEL_SPAN);
     return new Matrix4d(yawMat, new Vector3d(axial, lateral, 0.0), 1.0);
