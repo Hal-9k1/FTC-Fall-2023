@@ -35,6 +35,8 @@ public abstract class BasePilot implements RobotPilot {
     private final double robotInitialYaw;
     private Matrix4d robotTransformAS;
     private Matrix4d destinationFS;
+    // NOTE: These transforms have the tags facing +x, like the robot. FTC gives us the rotation
+    // matrices... facing +y! For no conceivable reason!
     private final Map<Integer, Matrix4d> tagTransformsWS;
     private final RobotLogger logger;
     private final boolean imuEnabled;
@@ -56,14 +58,19 @@ public abstract class BasePilot implements RobotPilot {
                     DistanceUnit.METER.fromUnit(tagData.distanceUnit, tagData.fieldPosition.get(2))
             );
             MatrixF ftcTagRot = tagData.fieldOrientation.toMatrix();
-            Matrix3d tagRotation = new Matrix3d(
+            Matrix3d tagRotation = new Matrix3d();
+            // hacky way to add a constant to the yaw:
+            tagRotation.rotZ(MatrixMagic.getYaw(new Matrix4d(new Matrix3d(
                     ftcTagRot.get(0, 0), ftcTagRot.get(0, 1), ftcTagRot.get(0, 2),
                     ftcTagRot.get(1, 0), ftcTagRot.get(1, 1), ftcTagRot.get(1, 2),
                     ftcTagRot.get(2, 0), ftcTagRot.get(2, 1), ftcTagRot.get(2, 2)
-            );
-            Matrix4d tagTransform = new Matrix4d(tagRotation, tagPosition, 1.0); // alliance space
-            tagTransform.mul(allianceOriginTransform); // field space
-            tagTransformsWS.put(tagData.id, tagTransform);
+            ), new Vector3d(), 1.0)) + Math.PI / 2);
+            Matrix4d tagTransformAS = new Matrix4d(tagRotation, tagPosition, 1.0); // alliance space
+            //tagTransform.mul(allianceOriginTransform); // field space
+            Matrix4d tagTransformWS = new Matrix4d(allianceOriginTransform);
+            tagTransformWS.mul(tagTransformAS);
+            //tagTransformWS = tagTransformAS;
+            tagTransformsWS.put(tagData.id, tagTransformWS);
         }
         this.imuEnabled = imuEnabled;
     }
@@ -86,6 +93,9 @@ public abstract class BasePilot implements RobotPilot {
         Point2d sumPosition = new Point2d();
         int knownDetectedTags = 0;
         for (AprilTagDetection detection : detections) {
+            if (detection.metadata == null) {
+                continue;
+            }
             // from https://ftc-docs.firstinspires.org/en/latest/apriltag/vision_portal/apriltag_advanced_use/apriltag-advanced-use.html
             Matrix3d tagRotCS = new Matrix3d();
             tagRotCS.setIdentity();
@@ -100,8 +110,12 @@ public abstract class BasePilot implements RobotPilot {
                     detection.ftcPose.pitch));
             // assuming rotation order XYZ
             tagRotCS.mul(rotZMat);
-            tagRotCS.mul(rotYMat);
-            tagRotCS.mul(rotXMat);
+            //tagRotCS.mul(rotYMat); // TODO: don't throw these away
+            //tagRotCS.mul(rotXMat);
+            Vector3d tagPosCS = new Vector3d(
+               DistanceUnit.METER.fromUnit(detection.metadata.distanceUnit, detection.ftcPose.x),
+               DistanceUnit.METER.fromUnit(detection.metadata.distanceUnit, detection.ftcPose.y),
+               DistanceUnit.METER.fromUnit(detection.metadata.distanceUnit, detection.ftcPose.z));
             Vector3d tagPosCS = new Vector3d(detection.ftcPose.x, detection.ftcPose.y,
                     detection.ftcPose.z);
             // tagWS = robotWS * cameraRS * tagCS
@@ -125,10 +139,9 @@ public abstract class BasePilot implements RobotPilot {
             sumRotation += robotYawWS;
             knownDetectedTags++;
         }
-        // TODO: known bug - should return early if knownDetectedTags == 0
-        // not fixing now in because we're mid-merge and a later change may fix
-        // it. if not then I hope I remember to check TODO comments (look
-        // there's two now)
+        if (knownDetectedTags == 0) {
+          return;
+        }
         double avgRotation = sumRotation / knownDetectedTags;
         Point2d avgPosition = new Point2d();
         avgPosition.scale(1.0 / knownDetectedTags, sumPosition);

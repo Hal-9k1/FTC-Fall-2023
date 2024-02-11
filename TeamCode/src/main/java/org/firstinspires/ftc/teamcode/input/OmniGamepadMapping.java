@@ -26,7 +26,8 @@ public class OmniGamepadMapping {
             gamepad.right_bumper,
             gamepad.a,
             gamepad.left_bumper,
-            gamepad.left_trigger > 0.1);
+            gamepad.left_trigger > 0.1,
+            gamepad.right_bumper);
   }
 
   /**

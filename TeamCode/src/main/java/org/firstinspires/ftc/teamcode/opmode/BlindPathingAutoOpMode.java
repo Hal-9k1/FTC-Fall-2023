@@ -44,8 +44,6 @@ public class BlindPathingAutoOpMode extends OpMode {
     ftcOriginTransform.rotZ(Math.PI);
     pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
             AprilTagGameDatabase.getCenterStageTagLibrary());
-    pilot = new SimplePilot(logger, driveSystem, ftcOriginTransform, initialRobotTransform,
-      AprilTagGameDatabase.getCenterStageTagLibrary());
     navigator = new BeelineNavigator(logger, pilot);
     pathPlanner = new BlindPathPlanner(logger, navigator);
 

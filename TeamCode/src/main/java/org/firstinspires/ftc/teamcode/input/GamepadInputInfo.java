@@ -24,7 +24,8 @@ import javax.vecmath.Vector3d;
                                      boolean shouldLaunchPlane,
                                      boolean shouldToggleAdvisor,
                                      boolean shouldArmActivate,
-                                     boolean shouldArmCancel) {
+                                     boolean shouldArmCancel,
+                                     boolean shouldLaunchPlane) {
     this.axial = axial;
     this.lateral = lateral;
     this.yaw = yaw;
