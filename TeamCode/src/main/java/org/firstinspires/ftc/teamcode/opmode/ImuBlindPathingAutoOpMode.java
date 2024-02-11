@@ -52,7 +52,7 @@ public class ImuBlindPathingAutoOpMode extends OpMode {
         pathPlanner = new BlindPathPlanner(logger, navigator);
         imu = hardwareMap.get(IMU.class, "imu 1");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP)
         ));
         imu.resetYaw();

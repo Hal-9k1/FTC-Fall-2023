@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.arm.DoubleMotorArm;
 import org.firstinspires.ftc.teamcode.arm.RobotArm;
-import org.firstinspires.ftc.teamcode.arm.SingleMotorArm;
 import org.firstinspires.ftc.teamcode.drive.DriveSystem;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveSystem;
 import org.firstinspires.ftc.teamcode.input.OmniGamepadMapping;
@@ -30,7 +30,7 @@ public class PlaneArmDriveTeleOpMode extends OpMode {
     logger.setFlushMode(true);
     driveSystem = new MecanumDriveSystem(hardwareMap);
     planeLauncher = new TensionLauncher(logger, hardwareMap);
-    arm = new SingleMotorArm(hardwareMap, logger);
+    arm = new DoubleMotorArm(hardwareMap, logger);
     mapping = new OmniGamepadMapping(gamepad1);
 
     telemetry.addData("Status", "Initialized");
