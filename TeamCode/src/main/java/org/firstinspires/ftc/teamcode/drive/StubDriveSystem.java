@@ -22,7 +22,7 @@ public class StubDriveSystem implements DriveSystem {
     public void halt() {}
 
     @Override
-    public void exec() {}
+    public void exec(double speed) {}
 
     @Override
     public void tickInput(DriveInputInfo input) {}

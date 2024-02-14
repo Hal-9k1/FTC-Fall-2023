@@ -85,6 +85,10 @@ public abstract class BasePilot implements RobotPilot {
         robotTransformAS.setIdentity();
         driveSystem.startNewAction();
     }
+    @Override
+    public double getFieldSpaceYaw() {
+        return MatrixMagic.getYaw(robotTransformFS);
+    }
 
     @Override
     public void updateWithTags(Matrix4d cameraTransformRobotSpace, List<AprilTagDetection> detections) {
@@ -116,8 +120,6 @@ public abstract class BasePilot implements RobotPilot {
                DistanceUnit.METER.fromUnit(detection.metadata.distanceUnit, detection.ftcPose.x),
                DistanceUnit.METER.fromUnit(detection.metadata.distanceUnit, detection.ftcPose.y),
                DistanceUnit.METER.fromUnit(detection.metadata.distanceUnit, detection.ftcPose.z));
-            Vector3d tagPosCS = new Vector3d(detection.ftcPose.x, detection.ftcPose.y,
-                    detection.ftcPose.z);
             // tagWS = robotWS * cameraRS * tagCS
             // robotWS = tagWS * tagCS^-1 * cameraRS^-1
             Matrix4d tagCS = new Matrix4d(tagRotCS, tagPosCS, 1.0);

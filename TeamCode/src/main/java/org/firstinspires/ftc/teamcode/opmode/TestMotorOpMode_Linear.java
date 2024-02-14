@@ -21,10 +21,12 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
     "right_back_drive"
     );
   private int[] encoderReadings;
+  private int[] deltaNanos;
   private int recordedEncoderReadings = 0;
   private int lastEncoderReading = 0;
+  private long lastNanoTime = 0;
   private int encoderReadingIdx = 0;
-  private static final int ENCODER_READING_COUNT = 10000;
+  private static final int ENCODER_READING_COUNT = 100000;
   private ArrayList<DcMotor> motors = new ArrayList<DcMotor>();
   private DcMotor currentMotor = null;
   private int currentMotorIdx = 0;
@@ -36,9 +38,11 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
   @Override
   public void runOpMode() {
     encoderReadings = new int[ENCODER_READING_COUNT];
+    deltaNanos = new int[ENCODER_READING_COUNT];
     for (int i = 0; i < motorNames.size(); ++i) {
       motors.add(hardwareMap.get(DcMotor.class, motorNames.get(i)));
       motors.get(i).setDirection(DcMotorSimple.Direction.FORWARD);
+      motors.get(i).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     updateCurrentMotor();
     waitForStart();
@@ -68,14 +72,17 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
         telemetry.addData("Current motor encoder", currentMotor.getCurrentPosition());
       } else {
         int encoderReading = currentMotor.getCurrentPosition();
+        long nanoTime = System.nanoTime();
         if (!didResetEncReads) {
           encoderReadings[encoderReadingIdx] = encoderReading - lastEncoderReading;
+          deltaNanos[encoderReadingIdx] = (int)(nanoTime - lastNanoTime);
           encoderReadingIdx = (encoderReadingIdx + 1) % ENCODER_READING_COUNT;
           if (recordedEncoderReadings < ENCODER_READING_COUNT) {
             ++recordedEncoderReadings;
           }
         }
         lastEncoderReading = encoderReading;
+        lastNanoTime = nanoTime;
         didResetEncReads = false;
         currentMotor.setPower(Math.abs(gamepad1.right_stick_y) > EPSILON ? 1.0f : 0.0f);
 
@@ -98,10 +105,12 @@ public class TestMotorOpMode_Linear extends LinearOpMode {
     if (recordedEncoderReadings == 0) {
       return 0;
     }
-    int total = 0;
+    long total = 0;
+    long totalTimeNano = 0;
     for (int i = 0; i < recordedEncoderReadings; ++i) {
       total += encoderReadings[i];
+      totalTimeNano += deltaNanos[i];
     }
-    return (double)total / (double)recordedEncoderReadings;
+    return (double)total / (double)recordedEncoderReadings * Math.pow(10, 9) / totalTimeNano;
   }
 }
